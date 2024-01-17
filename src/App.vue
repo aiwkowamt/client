@@ -1,9 +1,8 @@
 <template>
-  <main>
-    <RegisterPage />
-  </main>
+  <Header />
+  <router-view/>
 </template>
 
 <script setup>
-import RegisterPage from "@/pages/public/RegisterPage.vue";
+import Header from "@/components/Header.vue";
 </script>

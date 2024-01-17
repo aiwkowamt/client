@@ -23,7 +23,7 @@
     </div>
 
     <div class="form-group">
-      <label for="password" class="form-label">Confirm password</label>
+      <label for="confirmPassword" class="form-label">Confirm password</label>
       <input
           type="password"
           name="confirmPassword"
@@ -35,7 +35,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email" class="form-label">First name</label>
+      <label for="firstName" class="form-label">First name</label>
       <input
           name="firstName"
           type="text"
@@ -46,7 +46,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email" class="form-label">Second name</label>
+      <label for="secondName" class="form-label">Second name</label>
       <input
           name="secondName"
           type="text"
@@ -58,7 +58,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email" class="form-label">Address</label>
+      <label for="address" class="form-label">Address</label>
       <input
           name="address"
           type="text"
@@ -70,7 +70,7 @@
     </div>
 
     <div class="form-group">
-      <label for="email" class="form-label">Phone</label>
+      <label for="phone" class="form-label">Phone</label>
       <input
           name="phone"
           type="text"
@@ -111,19 +111,115 @@ export default {
   },
 
   methods: {
-    sendCredentials() {
-      const userData = {
-        'email': this.email,
-        'password': this.password,
-        'confirmPassword': this.confirmPassword,
-        'firstName': this.firstName,
-        'secondName': this.secondName,
-        'address': this.address,
-        'phone': this.phone,
-      }
+    ...mapActions(useAuthStore, ["registerUser"]),
 
-      useAuthStore().registerUser(userData);
+    validateEmail() {
+      if (!this.email) {
+        this.emailError = 'Это поле не должно быть пустым!';
+      } else if (!/\S+@\S+\.\S+/.test(this.email)) {
+        this.emailError = 'Почта имеет неправильный формат!';
+      } else {
+        this.emailError = null;
+      }
     },
+
+    validatePassword() {
+      if (!this.password) {
+        this.passwordError = 'Это поле не должно быть пустым!';
+      } else if (this.password.length < 6 || this.password.length > 20) {
+        this.passwordError = 'Пароль должен содержать не менее 6 символов и не больше 20!';
+      } else {
+        this.passwordError = null;
+      }
+    },
+
+    validateConfirmPassword() {
+      if (!this.confirmPassword) {
+        this.confirmPasswordError = 'Это поле не должно быть пустым!';
+      } else if (this.confirmPassword !== this.password) {
+        this.confirmPasswordError = 'Пароли не совпадают!';
+      } else {
+        this.confirmPasswordError = null;
+      }
+    },
+
+    validateFirstName() {
+      if (!this.firstName) {
+        this.firstNameError = 'Это поле не должно быть пустым!';
+      } else {
+        this.firstNameError = null;
+      }
+    },
+
+    validateSecondName() {
+      if (!this.secondName) {
+        this.secondNameError = 'Это поле не должно быть пустым!';
+      } else {
+        this.secondNameError = null;
+      }
+    },
+
+    validateAddress() {
+      if (!this.address) {
+        this.addressError = 'Это поле не должно быть пустым!';
+      } else {
+        this.addressError = null;
+      }
+    },
+
+    validatePhone() {
+      if (!this.phone) {
+        this.phoneError = 'Это поле не должно быть пустым!';
+      } else if (!/^\d{10}$/.test(this.phone)) {
+        this.phoneError = 'Номер телефона должен содержать 10 цифр!';
+      } else {
+        this.phoneError = null;
+      }
+    },
+
+    sendCredentials() {
+      if (
+          !this.emailError &&
+          !this.passwordError &&
+          !this.confirmPasswordError &&
+          !this.firstNameError &&
+          !this.secondNameError &&
+          !this.addressError &&
+          !this.phoneError
+      ) {
+        const userData = {
+          'email': this.email,
+          'password': this.password,
+          'confirmPassword': this.confirmPassword,
+          'firstName': this.firstName,
+          'secondName': this.secondName,
+          'address': this.address,
+          'phone': this.phone,
+        }
+
+        this.registerUser(userData);
+      }
+    },
+  },
+
+  watch: {
+    email: 'validateEmail',
+    password: 'validatePassword',
+    confirmPassword: 'validateConfirmPassword',
+    firstName: 'validateFirstName',
+    secondName: 'validateSecondName',
+    address: 'validateAddress',
+    phone: 'validatePhone',
+  },
+
+  created() {
+    this.validateEmail();
+    this.validatePassword();
+    this.validateConfirmPassword();
+    this.validateFirstName();
+    this.validateSecondName();
+    this.validateAddress();
+    this.validatePhone();
   },
 };
 

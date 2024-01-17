@@ -1,11 +1,10 @@
-<script setup>
-
-</script>
-
 <template>
-
+  Partner Page
 </template>
 
-<style scoped>
+<script>
+export default {
+  name: "PartnerHomePage",
+};
+</script>
 
-</style>

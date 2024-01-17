@@ -9,13 +9,26 @@ const routes = [
         component: () => import("@/pages/private/HomePage.vue"),
 
     },
+    {
+        path: "/PartnerHomePage",
+        name: "PartnerHomePage",
+        meta: {requiresAuth: true},
+        component: () => import("@/pages/private/PartnerHomePage.vue"),
+
+    },
+    {
+        path: "/SearchPage",
+        name: "SearchPage",
+        meta: {requiresAuth: true},
+        component: () => import("@/pages/private/SearchPage.vue"),
+
+    },
 
     {
         path: "/login",
         name: "login",
         component: () => import("@/pages/public/LoginPage.vue"),
     },
-
     {
         path: "/register",
         name: "register",

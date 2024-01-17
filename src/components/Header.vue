@@ -13,6 +13,9 @@
             <li class="nav-item">
               <router-link class="nav-link" to="PartnerHomePage">Стать партнёром</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="SearchPage">Перейти к поиску</router-link>
+            </li>
 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-bs-toggle="dropdown" aria-expanded="false">Перейти к заказу</a>

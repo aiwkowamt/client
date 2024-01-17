@@ -22,7 +22,7 @@
       <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
     </div>
 
-    <div class="text-danger" v-if="loginError">{{ loginError }}</div>
+    <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
 
     <button class="btn btn-primary" @click.prevent="sendCredentials">Login</button>
   </form>
@@ -78,13 +78,14 @@ export default {
           'email': this.email,
           'password': this.password,
         }
-        try {
-          this.loginUser(userData);
-          this.loginError = null;
-        } catch (message) {
-          this.loginError = message;
-        }
+        this.loginUser(userData);
       }
+    },
+  },
+
+  computed: {
+    authLoginError(){
+      return useAuthStore().getLoginError;
     },
   },
 };

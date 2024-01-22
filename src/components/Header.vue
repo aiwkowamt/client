@@ -10,11 +10,14 @@
 
         <div class="collapse navbar-collapse">
           <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            <li class="nav-item">
-              <router-link class="nav-link" to="PartnerHomePage">Стать партнёром</router-link>
+            <li v-if="userRoleId === 2" class="nav-item">
+              <router-link class="nav-link" to="/declaration-page">Стать партнёром</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="SearchPage">Перейти к поиску</router-link>
+              <router-link class="nav-link" to="/search-page">Перейти к поиску</router-link>
+            </li>
+            <li v-if="userRoleId === 3" class="nav-item">
+              <router-link class="nav-link" to="/restaurants-page">Перейти к ресторанам</router-link>
             </li>
 
             <li class="nav-item dropdown">
@@ -64,6 +67,10 @@ export default {
   computed: {
     isLoggedIn() {
       return useAuthStore().loggedIn;
+    },
+    userRoleId() {
+      console.log(useAuthStore().getUserRoleId);
+      return useAuthStore().getUserRoleId;
     },
   },
 }

@@ -1,16 +1,18 @@
 import {defineStore} from "pinia";
 import AxiosInstance from "@/services/AxiosInstance";
 import router from "@/router.js";
+import Cookies from 'js-cookie';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: {},
-        token: localStorage.getItem("token"),
+        token: Cookies.get("token"),
         loginError: null,
     }),
 
     getters: {
-        loggedIn: (state) => state.token !== null,
+        loggedIn: (state) => state.token != null,
+        getUserRoleId: (state) => state.user.role_id,
         getLoginError: (state) => state.loginError,
     },
 
@@ -20,15 +22,13 @@ export const useAuthStore = defineStore('auth', {
                 .then((response) => {
                     this.token = response.data.token;
                     this.user = response.data.user;
-                    console.log("token: ", this.token, "user: ", this.user);
-
-                    localStorage.setItem("token", this.token);
+                    // console.log("token: ", this.token, "user: ", this.user);
+                    Cookies.set("token", this.token);
                     router.push("/");
                 })
-                .catch((err) => {
-                    const message = err.response.data.message;
-                    this.loginError = message;
-                });
+                // .catch((err) => {
+                //     this.loginError = err.response.data.message;
+                // });
         },
 
         registerUser(data) {
@@ -36,14 +36,9 @@ export const useAuthStore = defineStore('auth', {
                 .then((response) => {
                     this.token = response.data.token;
                     this.user = response.data.user;
-                    console.log('token: ', this.token, 'user: ', this.user)
-
-                    localStorage.setItem('token', this.token);
+                    // console.log('token: ', this.token, 'user: ', this.user)
+                    Cookies.set("token", this.token);
                     router.push('/');
-                })
-                .catch((err) => {
-                    const message = err.response.data;
-                    console.log(message);
                 })
         },
 
@@ -52,8 +47,15 @@ export const useAuthStore = defineStore('auth', {
                 .then(() => {
                     this.user = {};
                     this.token = null;
-                    localStorage.removeItem('token');
+                    Cookies.remove("token");
                     router.push('/login');
+                })
+        },
+
+        getUserRole() {
+            AxiosInstance.get('/auth/user-role')
+                .then((response) => {
+                    this.user.role = response.data.role;
                 })
         },
     },

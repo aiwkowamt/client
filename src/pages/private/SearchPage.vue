@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <h1>Рестораны</h1>
     <ul>
       <li v-for="restaurant in restaurants" :key="restaurant.id">

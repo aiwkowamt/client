@@ -1,31 +1,33 @@
 <template>
-  <form>
-    <div class="form-group">
-      <label for="email" class="form-label">Email</label>
-      <input
-          name="email"
-          type="email"
-          v-model="email"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="emailError">{{ emailError }}</div>
-    </div>
+  <div class="container">
+    <form>
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input
+            name="email"
+            type="email"
+            v-model="email"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="emailError">{{ emailError }}</div>
+      </div>
 
-    <div class="form-group">
-      <label for="password" class="form-label">Password</label>
-      <input
-          type="password"
-          name="password"
-          v-model="password"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
-    </div>
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input
+            type="password"
+            name="password"
+            v-model="password"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
+      </div>
 
-    <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
+      <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
 
-    <button class="btn btn-primary" @click.prevent="sendCredentials">Login</button>
-  </form>
+      <button class="btn btn-primary" @click.prevent="sendCredentials">Login</button>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -84,7 +86,7 @@ export default {
   },
 
   computed: {
-    authLoginError(){
+    authLoginError() {
       return useAuthStore().getLoginError;
     },
   },

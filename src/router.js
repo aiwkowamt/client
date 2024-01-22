@@ -10,15 +10,15 @@ const routes = [
 
     },
     {
-        path: "/PartnerHomePage",
-        name: "PartnerHomePage",
+        path: "/declaration-page",
+        name: "declaration-page",
         meta: {requiresAuth: true},
-        component: () => import("@/pages/private/PartnerHomePage.vue"),
+        component: () => import("@/pages/private/DeclarationPage.vue"),
 
     },
     {
-        path: "/SearchPage",
-        name: "SearchPage",
+        path: "/search-page",
+        name: "search-page",
         meta: {requiresAuth: true},
         component: () => import("@/pages/private/SearchPage.vue"),
 

@@ -1,87 +1,89 @@
 <template>
-  <form>
-    <div class="form-group">
-      <label for="email" class="form-label">Email</label>
-      <input
-          name="email"
-          type="email"
-          v-model="email"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="emailError">{{ emailError }}</div>
-    </div>
+  <div class="container">
+    <form>
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input
+            name="email"
+            type="email"
+            v-model="email"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="emailError">{{ emailError }}</div>
+      </div>
 
-    <div class="form-group">
-      <label for="password" class="form-label">Password</label>
-      <input
-          type="password"
-          name="password"
-          v-model="password"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
-    </div>
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input
+            type="password"
+            name="password"
+            v-model="password"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
+      </div>
 
-    <div class="form-group">
-      <label for="confirmPassword" class="form-label">Confirm password</label>
-      <input
-          type="password"
-          name="confirmPassword"
-          v-model="confirmPassword"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="confirmPasswordError">{{ confirmPasswordError }}</div>
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm password</label>
+        <input
+            type="password"
+            name="confirmPassword"
+            v-model="confirmPassword"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="confirmPasswordError">{{ confirmPasswordError }}</div>
 
-    </div>
+      </div>
 
-    <div class="form-group">
-      <label for="firstName" class="form-label">First name</label>
-      <input
-          name="firstName"
-          type="text"
-          v-model="firstName"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="firstNameError">{{ firstNameError }}</div>
-    </div>
+      <div class="form-group">
+        <label for="firstName" class="form-label">First name</label>
+        <input
+            name="firstName"
+            type="text"
+            v-model="firstName"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="firstNameError">{{ firstNameError }}</div>
+      </div>
 
-    <div class="form-group">
-      <label for="secondName" class="form-label">Second name</label>
-      <input
-          name="secondName"
-          type="text"
-          v-model="secondName"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="secondNameError">{{ secondNameError }}</div>
+      <div class="form-group">
+        <label for="secondName" class="form-label">Second name</label>
+        <input
+            name="secondName"
+            type="text"
+            v-model="secondName"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="secondNameError">{{ secondNameError }}</div>
 
-    </div>
+      </div>
 
-    <div class="form-group">
-      <label for="address" class="form-label">Address</label>
-      <input
-          name="address"
-          type="text"
-          v-model="address"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="addressError">{{ addressError }}</div>
+      <div class="form-group">
+        <label for="address" class="form-label">Address</label>
+        <input
+            name="address"
+            type="text"
+            v-model="address"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="addressError">{{ addressError }}</div>
 
-    </div>
+      </div>
 
-    <div class="form-group">
-      <label for="phone" class="form-label">Phone</label>
-      <input
-          name="phone"
-          type="text"
-          v-model="phone"
-          class="form-control"
-      >
-      <div class="text-danger" v-if="phoneError">{{ phoneError }}</div>
-    </div>
+      <div class="form-group">
+        <label for="phone" class="form-label">Phone</label>
+        <input
+            name="phone"
+            type="text"
+            v-model="phone"
+            class="form-control"
+        >
+        <div class="text-danger" v-if="phoneError">{{ phoneError }}</div>
+      </div>
 
-    <button class="btn btn-primary" @click.prevent="sendCredentials">Register</button>
-  </form>
+      <button class="btn btn-primary" @click.prevent="sendCredentials">Register</button>
+    </form>
+  </div>
 </template>
 
 <script>

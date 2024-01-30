@@ -182,15 +182,15 @@ export default {
         dish_id: item.dish.id,
         quantity: item.quantity
       }))
-      const order = {
+      const data = {
         restaurant_id: this.restaurant_id,
         items,
       };
-      AxiosInstance.post('create-order', {...order})
-          // .then(() => {
-          //   this.cart = [];
-          //   localStorage.removeItem('cart');
-          // })
+      AxiosInstance.post('create-order', data)
+          .then(() => {
+            this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));
+            localStorage.setItem('cart', JSON.stringify(this.cart));
+          })
     },
   },
 };

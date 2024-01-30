@@ -28,8 +28,7 @@
 </template>
 
 <script>
-import AxiosInstance from "@/services/AxiosInstance";
-import loginPage from "@/pages/public/LoginPage.vue";
+import AxiosInstance from "@/services/AxiosInstance.js";
 
 export default {
   name: "DeclarationPage",
@@ -52,7 +51,7 @@ export default {
       }
 
       AxiosInstance.post("/declaration", {...data})
-          .then((response) => {
+          .then(() => {
             this.declarationStatus = 'pending';
           })
     },
@@ -61,7 +60,6 @@ export default {
       AxiosInstance.get("/check-declaration-status")
           .then((response) => {
             this.declarationStatus = response.data.status;
-            console.log(response.data);
           })
     },
   },

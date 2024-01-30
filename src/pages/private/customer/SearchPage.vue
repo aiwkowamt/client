@@ -14,21 +14,12 @@
 
     <nav v-if="pagination.last_page > 1">
       <ul class="pagination">
-<!--        <li :class="{ 'disabled': pagination.current_page === 1 }">-->
-<!--          <a @click.prevent="changePage(pagination.current_page - 1)" href="#" aria-label="Previous">-->
-<!--            <span aria-hidden="true">&laquo;</span>-->
-<!--          </a>-->
-<!--        </li>-->
         <li v-for="page in pagination.last_page" :key="page" :class="{ 'active': page === pagination.current_page }">
           <a @click.prevent="changePage(page)" href="#">{{ page }}</a>
         </li>
-<!--        <li :class="{ 'disabled': pagination.current_page === pagination.last_page }">-->
-<!--          <a @click.prevent="changePage(pagination.current_page + 1)" href="#" aria-label="Next">-->
-<!--            <span aria-hidden="true">&raquo;</span>-->
-<!--          </a>-->
-<!--        </li>-->
       </ul>
     </nav>
+
   </div>
 </template>
 
@@ -56,14 +47,14 @@ export default {
     this.searchRestaurants();
   },
 
-  watch: {
-    '$route.query.name': function (newName, oldName) {
-      if (newName !== oldName) {
-        this.searchQuery.page = 1;
-        this.searchRestaurants();
-      }
-    }
-  },
+  // watch: {
+  //   '$route.query.name': function (newName, oldName) {
+  //     if (newName !== oldName) {
+  //       this.searchQuery.page = 1;
+  //       this.searchRestaurants();
+  //     }
+  //   }
+  // },
 
   methods: {
     searchRestaurants() {

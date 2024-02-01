@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1>Редактирование Ресторана</h1>
+    <h1>Ресторан</h1>
     <form>
       <label for="editedName">Название:</label>
       <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
@@ -25,6 +25,28 @@
         </li>
       </ul>
     </div>
+
+    <div v-for="order in orders" :key="order.id" class="card mb-3">
+      <div class="card-header">
+        Заказ #{{ order.id }}
+        <select v-model="order.status" @change="updateOrderStatus(order.id, order.status)" class="form-control">
+          <option value="pending">Ожидает</option>
+          <option value="processing">Обрабатывается</option>
+          <option value="cancelled">Отменен</option>
+          <option value="completed">Завершен</option>
+        </select>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Дата создания: {{ formatDateTime(order.created_at) }}</p>
+        <h6 class="card-subtitle mb-2 text-muted">Блюда:</h6>
+        <ul class="list-group">
+          <li v-for="dish in order.dishes" :key="dish.id" class="list-group-item">
+            {{ dish.name }} - {{ dish.price }}$
+          </li>
+        </ul>
+        <div>Общая стоимость: {{ calculateTotalCost(order) }}$</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -47,12 +69,14 @@ export default {
         phone: "",
       },
       dishes: [],
+      orders: [],
     };
   },
 
   mounted() {
     this.getRestaurant(this.id);
     this.getRestaurantDishes(this.id);
+    this.getRestaurantOrders(this.id);
   },
 
   methods: {
@@ -70,11 +94,31 @@ export default {
           });
     },
 
+    getRestaurantOrders(restaurant_id) {
+      AxiosInstance.get(`/restaurant-orders/${restaurant_id}`)
+          .then((response) => {
+            this.orders = response.data.orders;
+          });
+    },
+
     updateRestaurant() {
       AxiosInstance.put(`/restaurants/${this.id}`, this.restaurant)
           .then(() => {
             this.$router.push('/user-restaurants');
           })
+    },
+
+    formatDateTime(dateTimeString) {
+      const options = {hour: 'numeric', minute: 'numeric', day: 'numeric', month: 'numeric', year: 'numeric'};
+      const formattedDateTime = new Date(dateTimeString).toLocaleString('ru-RU', options);
+      return formattedDateTime;
+    },
+    calculateTotalCost(order) {
+      return order.dishes.reduce((total, dish) => total + dish.price, 0);
+    },
+
+    updateOrderStatus(orderId, status) {
+      AxiosInstance.put(`/orders/${orderId}`, { status })
     },
   },
 };

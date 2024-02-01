@@ -78,6 +78,16 @@ const routes = [
     },
 
     {
+        path: "/orders/:status",
+        name: "orders",
+        meta: {
+            requiresAuth: true
+        },
+        component: () => import("@/pages/private/customer/UserOrdersPage.vue"),
+        props: true,
+    },
+
+    {
         path: "/login",
         name: "login",
         component: () => import("@/pages/public/LoginPage.vue"),

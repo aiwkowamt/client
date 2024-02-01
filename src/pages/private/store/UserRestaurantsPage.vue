@@ -3,10 +3,9 @@
     <h1>Список Ресторанов</h1>
     <ul>
       <li v-for="restaurant in restaurants" :key="restaurant.id">
-        <div>{{ restaurant.name }}</div>
+        <router-link :to="`/restaurant-edit/${restaurant.id}`">{{ restaurant.name }}</router-link>
         <div>{{ restaurant.address }}</div>
         <div>{{ restaurant.phone }}</div>
-        <router-link :to="`/restaurant-edit/${restaurant.id}`">Редактировать</router-link>
       </li>
     </ul>
   </div>

@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <div class="row">
+
       <div class="col-md-9">
         <div>
           <h1>Блюда ресторана</h1>
@@ -38,8 +39,6 @@
         </div>
       </div>
 
-
-
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -70,6 +69,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>

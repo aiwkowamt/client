@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-expand-md navbar-dark bg-info" aria-label="Fourth navbar example">
+    <nav class="navbar navbar-expand-md navbar-dark bg-success" aria-label="Fourth navbar example">
       <div class="container">
         <router-link class="navbar-brand" to="/">PalmoFood</router-link>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
@@ -12,19 +12,20 @@
             <li v-if="role === 'customer'" class="nav-item">
               <router-link class="nav-link" to="/declaration-create">Стать партнёром</router-link>
             </li>
+
             <li v-if="role === 'customer'" class="nav-item">
               <router-link class="nav-link" to="/search">Перейти к поиску</router-link>
             </li>
 
-            <li v-if="role === 'customer'" class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-bs-toggle="dropdown"
-                 aria-expanded="false">Перейти к заказу</a>
-              <ul class="dropdown-menu" aria-labelledby="dropdown04">
-                <li><a class="dropdown-item" href="#">Раз</a></li>
-                <li><a class="dropdown-item" href="#">Два</a></li>
-                <li><a class="dropdown-item" href="#">Три</a></li>
-              </ul>
-            </li>
+<!--            <li v-if="role === 'customer'" class="nav-item dropdown">-->
+<!--              <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-bs-toggle="dropdown"-->
+<!--                 aria-expanded="false">Перейти к заказу</a>-->
+<!--              <ul class="dropdown-menu" aria-labelledby="dropdown04">-->
+<!--                <li><a class="dropdown-item" href="#">Раз</a></li>-->
+<!--                <li><a class="dropdown-item" href="#">Два</a></li>-->
+<!--                <li><a class="dropdown-item" href="#">Три</a></li>-->
+<!--              </ul>-->
+<!--            </li>-->
 
             <li v-if="role === 'store'" class="nav-item">
               <router-link class="nav-link" to="/restaurant-create">Добавить заведение</router-link>
@@ -41,14 +42,11 @@
               <i class="bi bi-person"></i>
             </a>
             <ul class="dropdown-menu" aria-labelledby="userDropdown">
-              <router-link class="dropdown-item" to="/register" v-if="!isLoggedIn">Регистрация</router-link>
-              <li>
-                <hr class="dropdown-divider" v-if="!isLoggedIn"></hr>
-              </li>
-              <router-link class="dropdown-item" to="/login" v-if="!isLoggedIn">Логин</router-link>
-
-
-              <li><a class="dropdown-item" href="#" @click.prevent="logoutUser" v-if="isLoggedIn">Выйти</a></li>
+              <router-link v-if="!isLoggedIn" class="dropdown-item" to="/register">Регистрация</router-link>
+              <router-link v-if="!isLoggedIn" class="dropdown-item" to="/login">Логин</router-link>
+              <router-link v-if="isLoggedIn && role === 'customer'" class="dropdown-item" to="/orders/pending">Мои заказы</router-link>
+              <li><hr class="dropdown-divider"></hr></li>
+              <li><a v-if="isLoggedIn" @click.prevent="logoutUser" class="dropdown-item" href="#">Выйти</a></li>
             </ul>
           </div>
         </div>

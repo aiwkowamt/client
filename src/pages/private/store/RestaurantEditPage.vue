@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="container">
     <h1>Ресторан</h1>
     <form>
@@ -52,8 +53,12 @@
 
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
+import Header from "@/components/Header.vue";
+import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 
 export default {
+  mixins: [ValidatorMixin],
+  components: {Header},
   props: {
     id: {
       type: [Number, String],

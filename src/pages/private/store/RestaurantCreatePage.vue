@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="container">
     <form @submit.prevent="createRestaurant" enctype='multipart/form-data'>
       <div class="form-group">
@@ -39,6 +40,7 @@
             name="image"
         >
         <span v-if="imageError" class="text-danger">{{ imageError }}</span>
+        <img v-if="image" :src="imageURL" alt="Selected Image" style="max-width: 200px; margin-top: 10px;">
       </div>
       <button type="submit" class="btn btn-primary">Добавить</button>
     </form>
@@ -48,8 +50,11 @@
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
+import Header from "@/components/Header.vue";
+import router from "@/router.js";
 
 export default {
+  components: {Header},
   mixins: [ValidatorMixin],
   data() {
     return {
@@ -62,7 +67,15 @@ export default {
       addressError: '',
       phoneError: '',
       imageError: '',
+
+      successMessage: '',
     };
+  },
+
+  computed: {
+    imageURL() {
+      return this.image ? URL.createObjectURL(this.image) : '';
+    }
   },
 
   methods: {
@@ -82,18 +95,24 @@ export default {
       }
 
       if (!this.nameError && !this.addressError && !this.phoneError) {
-        const data = {
-          'name': this.name,
-          'address': this.address,
-          'phone': this.phone,
-          'image': this.image
-        };
+        const confirmed = window.confirm('Вы уверены, что хотите добавить ресторан?');
+        if (confirmed) {
+          const data = {
+            'name': this.name,
+            'address': this.address,
+            'phone': this.phone,
+            'image': this.image
+          };
 
-        AxiosInstance.post('/restaurants', {...data}, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          }
-        })
+          AxiosInstance.post('/restaurants', {...data}, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          }).then(() => {
+            alert('Ресторан успешно добавлен');
+            router.push('/user-restaurants');
+          })
+        }
       }
     },
 
@@ -112,8 +131,43 @@ export default {
     },
 
     handleImageChange(event) {
-      this.image = event.target.files[0];
+      const file = event.target.files[0];
+      if (file) {
+        if (['image/jpeg', 'image/png'].includes(file.type) && file.size <= 5242880) {
+          this.image = file;
+          this.imageError = '';
+        } else {
+          this.imageError = 'Формат изображения должен быть JPEG или PNG, размер не должен превышать 5 МБ';
+          this.image = null;
+          event.target.value = '';
+        }
+      }
     },
-  }
+
+  },
+
+  watch: {
+    name(newValue) {
+      this.nameError = this.validator(newValue, 'required|min:5|max:10');
+    },
+    address(newValue) {
+      this.addressError = this.validator(newValue, 'required|min:5|max:50|include:Украина');
+    },
+    phone(newValue) {
+      this.phoneError = this.validator(newValue, 'required|integer|size:10');
+    },
+    image(newValue) {
+      if (!newValue) {
+        this.imageError = 'Изображение обязательно для загрузки';
+      } else if (!['image/jpeg', 'image/png'].includes(newValue.type)) {
+        this.imageError = 'Формат изображения должен быть JPEG или PNG';
+      } else if (newValue.size > 5242880) {
+        this.imageError = 'Размер изображения не должен превышать 5 МБ';
+      } else {
+        this.imageError = '';
+      }
+    },
+  },
+
 }
 </script>

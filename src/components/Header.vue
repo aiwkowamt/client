@@ -2,6 +2,7 @@
   <nav class="navbar navbar-expand-md navbar-dark bg-success" aria-label="Fourth navbar example">
     <div class="container">
       <router-link class="navbar-brand" to="/">DeliveryFood</router-link>
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
               aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>

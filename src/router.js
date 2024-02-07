@@ -93,7 +93,6 @@ const routes = [
             requiresAuth: true
         },
         component: () => import("@/pages/private/customer/UserOrdersPage.vue"),
-        props: true,
     },
 
     {

@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="container">
     <ul>
       <form @submit.prevent="searchRestaurants">
@@ -7,10 +8,11 @@
       </form>
       <li v-for="restaurant in restaurants" :key="restaurant.id">
         <div class="restaurant-card">
-          <img :src="getRestaurantImageUrl(restaurant.image_path)" class="card-img-top" alt="Restaurant Image">
+          <img :src="getRestaurantImageUrl(restaurant.image_path)" class="card-img-top" alt="Restaurant Image" style="width: 100px; height: 100px;">
           <div class="restaurant-details">
             <h3>{{ restaurant.name }}</h3>
             <p>{{ restaurant.address }}</p>
+            <p>{{restaurant.average_rating}}</p>
             <router-link :to="`/restaurant-dishes/${restaurant.id}`">Перейти</router-link>
           </div>
         </div>
@@ -31,8 +33,10 @@
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
 import router from "@/router.js";
+import Header from "@/components/Header.vue";
 
 export default {
+  components: {Header},
   data() {
     return {
       restaurants: [],
@@ -41,6 +45,7 @@ export default {
         name: '',
         page: 1,
       },
+      averageRatings: {},
     };
   },
 
@@ -87,7 +92,6 @@ export default {
     getRestaurantImageUrl(imagePath) {
       return imagePath ? `http://localhost:8080/storage/${imagePath}` : '';
     },
-
   },
 };
 </script>

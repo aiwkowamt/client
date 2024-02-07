@@ -27,7 +27,13 @@ export default {
             }
         },
         validateRequired(value) {
-            return value !== null && value !== undefined && !!value.trim();
+            if (value === null || value === undefined) {
+                return false;
+            }
+            if (typeof value === 'string') {
+                return !!value.trim();
+            }
+            return true;
         },
         validateEmail(value) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,4 +1,5 @@
 <template>
+  <Header></Header>
   <div class="container">
     <div class="btn-group" role="group">
       <a @click="filterOrders('all')" :class="{ 'active': selectedStatus === 'all' }" class="btn btn-primary">Все</a>
@@ -17,7 +18,9 @@
       </div>
       <div class="card-body">
         <h5 class="card-title">Статус: {{ order.status }}</h5>
-        <p class="card-text">Ресторан: {{ order.dishes[0].restaurant.name }}</p>
+        <p class="card-text">Ресторан: {{
+            order && order.dishes && order.dishes.length > 0 && order.dishes[0].restaurant ? order.dishes[0].restaurant.name : 'Ресторан не найден'
+          }}</p>
         <p class="card-text">Дата создания: {{ formatDateTime(order.created_at) }}</p>
         <h6 class="card-subtitle mb-2 text-muted">Блюда:</h6>
         <ul class="list-group">
@@ -27,7 +30,7 @@
         </ul>
         <div>К оплате: {{ calculateTotalCost(order) }}$</div>
         <button
-            v-if="order.status === 'completed'"
+            v-if="order.status === 'completed' && order.comment_id === null"
             type="button"
             class="btn btn-primary"
             data-bs-toggle="modal"
@@ -43,15 +46,20 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ selectedOrder && selectedOrder.dishes[0].restaurant.name }}</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              {{ selectedOrder && selectedOrder.dishes[0].restaurant.name }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div>Напишите отзыв о блюдах и обслуживании.</div>
-            <textarea
-                class="form-control"
-                v-model="comment.text"
-            ></textarea>
+            <div>
+              <div>Напишите отзыв о блюдах и обслуживании.</div>
+              <textarea
+                  class="form-control"
+                  v-model="comment.text"
+              ></textarea>
+              <span v-if="commentTextError" class="text-danger">{{ commentTextError }}</span>
+            </div>
+
             <div class="container mt-3">
               <div class="rating">
             <span
@@ -63,6 +71,8 @@
             >
               &#9733;
             </span>
+                <div v-if="commentGradeError" class="text-danger">{{ commentGradeError }}</div>
+
               </div>
               <div id="rating-value" class="mt-2">Вы оценили на {{ comment.grade }} звезд(ы).</div>
             </div>
@@ -73,6 +83,8 @@
                 @click="postComment(this.selectedOrder.id)"
                 type="button"
                 class="btn btn-primary"
+                data-bs-dismiss="modal"
+                aria-label="Close"
             >
               Отправить
             </button>
@@ -87,8 +99,12 @@
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
 import router from "@/router.js";
+import Header from "@/components/Header.vue";
+import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 
 export default {
+  components: {Header},
+  mixins: [ValidatorMixin],
   data() {
     return {
       selectedStatus: null,
@@ -100,6 +116,8 @@ export default {
         text: '',
         order_id: '',
       },
+      commentTextError: '',
+      commentGradeError: '',
     };
   },
 
@@ -139,15 +157,20 @@ export default {
     },
 
     postComment() {
-      this.comment.order_id =  this.selectedOrder.id;
-      console.log(this.comment);
-      AxiosInstance.post("/comments", {...this.comment})
-          .then(response => {
-            this.comment.text = '';
-            this.comment.grade = 0;
-            this.selectedOrder = null;
-          })
+      this.commentTextError = this.validator(this.comment.text, 'required|min:10|max:500');
+      this.commentGradeError = this.validator(this.comment.grade, 'required|integer');
+      if (!this.commentTextError && !this.commentGradeError) {
+        this.comment.order_id = this.selectedOrder.id;
+        AxiosInstance.post("/comments", {...this.comment})
+            .then(response => {
+              this.comment.text = '';
+              this.comment.grade = 0;
+              this.selectedOrder = null;
+              router.push("/");
+            })
+      }
     },
+
   },
 
   computed: {
@@ -158,7 +181,17 @@ export default {
         return this.orders.filter(order => order.status === this.selectedStatus);
       }
     }
-  }
+  },
+
+  watch: {
+    'comment.text': function (newValue) {
+      this.commentTextError = this.validator(newValue, 'required|min:10|max:500');
+    },
+    'comment.grade': function (newValue) {
+      this.commentGradeError = this.validator(newValue, 'required|integer');
+    },
+  },
+
 };
 </script>
 

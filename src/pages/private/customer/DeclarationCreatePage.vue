@@ -1,6 +1,6 @@
 <template>
+  <Header></Header>
   <div class="container">
-
     <div  v-if="declarationStatus === null">
       <form @submit.prevent="submitDeclaration">
         <div class="form-group">
@@ -29,9 +29,11 @@
 
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
+import Header from "@/components/Header.vue";
 
 export default {
   name: "DeclarationPage",
+  components: {Header},
 
   data() {
     return {

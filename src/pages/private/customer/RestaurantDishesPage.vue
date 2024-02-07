@@ -1,10 +1,11 @@
 <template>
+  <Header></Header>
   <div class="container">
     <div class="row">
 
       <div class="col-md-9">
         <div>
-          <h1>{{restaurant.name}}</h1>
+          <h1>{{ restaurant ? restaurant.name : 'Загрузка...' }}</h1>
           <ul class="list-group">
             <li v-for="dish in dishes" :key="dish.id" class="list-group-item">
               <div>Название: {{ dish.name }}</div>
@@ -48,24 +49,38 @@
             </div>
             <div class="modal-body">
               <h1>Ваш заказ</h1>
-              <h1>{{ restaurant.name }}</h1>
+              <h1>{{ restaurant ? restaurant.name : 'Загрузка...' }}</h1>
               <ul class="list-group">
                 <li v-for="(item, index) in filteredCart" :key="index" class="list-group-item">
                   <div>Наименование: {{ item.dish.name }} (x{{ item.quantity }})</div>
                   <div>Цена: {{ item.dish.price * item.quantity }}$</div>
 
-                  <button @click="decreaseQuantity(item.dish.id)" type="button" class="btn btn-secondary btn-sm">-</button>
-                  <button @click="increaseQuantity(item.dish.id)" type="button" class="btn btn-secondary btn-sm">+</button>
-                  <button @click="removeFromCart(item.dish.id)" type="button" class="btn btn-danger btn-sm">Удалить</button>
+                  <button @click="decreaseQuantity(item.dish.id)" type="button" class="btn btn-secondary btn-sm">-
+                  </button>
+                  <button @click="increaseQuantity(item.dish.id)" type="button" class="btn btn-secondary btn-sm">+
+                  </button>
+                  <button @click="removeFromCart(item.dish.id)" type="button" class="btn btn-danger btn-sm">Удалить
+                  </button>
                 </li>
               </ul>
               <div>Общая стоимость: {{ totalCost }}$</div>
-              <div>Адресс</div>
-              <input v-model="address" type="text">
+              <div class="form-group">
+                <label for="address">Адресс</label>
+                <input
+                    type="text"
+                    v-model="address"
+                    id="address"
+                    class="form-control autocomplete-suggestions"
+                    @focus="initAutocomplete"
+                >
+                <span v-if="addressError" class="text-danger">{{ addressError }}</span>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Подумать еще</button>
-              <button @click="confirmOrder" type="button" class="btn btn-primary">Подтвердить адресс</button>
+              <button @click="confirmOrder" type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                      aria-label="Close">Подтвердить адресс
+              </button>
             </div>
           </div>
         </div>
@@ -77,9 +92,14 @@
 
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
+import Header from "@/components/Header.vue";
+import router from "@/router.js";
+import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 
 export default {
   name: "RestaurantDishesPage",
+  mixins: [ValidatorMixin],
+  components: {Header},
 
   props: {
     restaurant_id: {
@@ -93,8 +113,9 @@ export default {
       restaurant: null,
       dishes: [],
       cart: JSON.parse(localStorage.getItem('cart')) || [],
-      isCartVisible: false,
+      isCartVisible: true,
       address: '',
+      addressError: '',
     };
   },
 
@@ -180,22 +201,52 @@ export default {
     },
 
     confirmOrder() {
-      const restaurantFilteredCart = this.cart.filter(item => item.dish.restaurant_id === parseInt(this.restaurant_id));
-      const items = restaurantFilteredCart.map(item => ({
-        dish_id: item.dish.id,
-        quantity: item.quantity
-      }))
-      const data = {
-        restaurant_id: this.restaurant_id,
-        items,
-      };
+      this.addressError = this.validator(this.address, 'required|min:5|max:50|include:Украина');
+      if (!this.addressError) {
+        const restaurantFilteredCart = this.cart.filter(item => item.dish.restaurant_id === parseInt(this.restaurant_id));
+        const items = restaurantFilteredCart.map(item => ({
+          dish_id: item.dish.id,
+          quantity: item.quantity
+        }))
+        const data = {
+          restaurant_id: this.restaurant_id,
+          items,
+        };
 
-      AxiosInstance.post('create-order', data)
-          .then(() => {
-            this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));
-            localStorage.setItem('cart', JSON.stringify(this.cart));
-          })
+        AxiosInstance.post('create-order', data)
+            .then(() => {
+              this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));
+              localStorage.setItem('cart', JSON.stringify(this.cart));
+
+              router.push('/orders/pending');
+            })
+      }
+    },
+
+    initAutocomplete() {
+      const input = document.getElementById('address');
+      const autocomplete = new google.maps.places.Autocomplete(input);
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) {
+          this.address = '';
+          return;
+        }
+        this.address = place.formatted_address;
+      });
     },
   },
+  watch: {
+    address(newValue) {
+      this.addressError = this.validator(newValue, 'required|min:5|max:50|include:Украина');
+    },
+  }
 };
 </script>
+
+<style>
+.pac-container {
+  z-index: 9999;
+}
+</style>

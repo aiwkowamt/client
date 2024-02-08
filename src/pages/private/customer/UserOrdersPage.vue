@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container">
     <div class="btn-group" role="group">
       <a @click="filterOrders('all')" :class="{ 'active': selectedStatus === 'all' }" class="btn btn-primary">Все</a>
@@ -101,9 +102,10 @@ import AxiosInstance from "@/services/AxiosInstance.js";
 import router from "@/router.js";
 import Header from "@/components/Header.vue";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
-  components: {Header},
+  components: {NewHeader, Header},
   mixins: [ValidatorMixin],
   data() {
     return {

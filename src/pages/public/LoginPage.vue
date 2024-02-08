@@ -1,33 +1,54 @@
 <template>
-  <Header></Header>
-  <div class="container">
-    <form>
-      <div class="form-group">
-        <label for="email" class="form-label">Email</label>
-        <input
-            name="email"
-            type="email"
-            v-model="email"
-            class="form-control"
-        >
-        <div class="text-danger" v-if="emailError">{{ emailError }}</div>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
+  <div class="container mt-3">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow">
+          <div class="card-body">
+            <h2 class="font-weight-bold text-center mb-4">Логин</h2>
+            <form>
+              <div class="form-group">
+                <label for="email" class="font-weight-bold">Почта</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                  </div>
+                  <input
+                      name="email"
+                      type="email"
+                      v-model="email"
+                      class="form-control"
+                      placeholder="Введите вашу почту"
+                  >
+                </div>
+                <div class="text-danger" v-if="emailError">{{ emailError }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="password" class="font-weight-bold">Пароль</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                  </div>
+                  <input
+                      type="password"
+                      name="password"
+                      v-model="password"
+                      class="form-control"
+                      placeholder="Введите ваш пароль"
+                  >
+                </div>
+                <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
+              </div>
+              <!--      <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>-->
+
+              <button class="btn btn-primary w-100 mt-3 shadow" @click.prevent="sendCredentials">LOGIN</button>
+            </form>
+          </div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="password" class="form-label">Password</label>
-        <input
-            type="password"
-            name="password"
-            v-model="password"
-            class="form-control"
-        >
-        <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
-      </div>
-
-<!--      <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>-->
-
-      <button class="btn btn-primary" @click.prevent="sendCredentials">Login</button>
-    </form>
+    </div>
   </div>
 </template>
 
@@ -36,9 +57,10 @@ import {useAuthStore} from "@/stores/Auth.js";
 import {mapActions} from "pinia";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 import Header from "@/components/Header.vue";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
-  components: {Header},
+  components: {NewHeader, Header},
   mixins: [ValidatorMixin],
   data() {
     return {

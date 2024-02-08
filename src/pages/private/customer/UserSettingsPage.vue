@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container mt-4">
     <div class="row">
       <div class="col-md-6 offset-md-3">
@@ -37,10 +38,11 @@
 import AxiosInstance from "@/services/AxiosInstance.js";
 import Header from "@/components/Header.vue";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
   mixins: [ValidatorMixin],
-  components: {Header},
+  components: {NewHeader, Header},
 
   data() {
     return {

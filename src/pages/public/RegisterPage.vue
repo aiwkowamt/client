@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container">
     <form>
       <div class="form-group">
@@ -61,9 +62,10 @@ import {useAuthStore} from "@/stores/Auth.js";
 import {mapActions} from "pinia";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 import Header from "@/components/Header.vue";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
-  components: {Header},
+  components: {NewHeader, Header},
   mixins: [ValidatorMixin],
   data() {
     return {

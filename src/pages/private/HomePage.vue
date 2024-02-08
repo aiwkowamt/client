@@ -1,9 +1,20 @@
 <template>
-  <NewHeader></NewHeader>
-<!--  <Header></Header>-->
-  <div>
-    {{ user && user.email }}
+  <NewHeader/>
+  <!--  <Header></Header>-->
+  <div class="footer">
+    <div v-if="role === 'customer'" class="partner-block">
+      <div class="partner-heading">Стать партнёром</div>
+      <img src="../../../public/element_1.png" class="partner-image">
+      <div class="partner-content">
+        <div class="partner-text">
+          Ускоряйте рост бизнеса вместе с нами! Наши технологии и база пользователей - идеальный рецепт для увеличения
+          продаж и открытия новых возможностей!
+        </div>
+        <router-link to="/declaration-create" class="partner-link">Регистрация заявки</router-link>
+      </div>
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -17,6 +28,7 @@ export default {
   data() {
     return {
       user: null,
+      role: '',
     };
   },
 
@@ -28,7 +40,8 @@ export default {
   methods: {
     getUser() {
       AxiosInstance.get('/user')
-          .then(response => {
+          .then((response) => {
+            this.role = response.data.user.role.name;
             this.user = response.data.user;
           })
     },
@@ -58,3 +71,52 @@ export default {
 };
 </script>
 
+<style>
+.partner-block {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+
+.partner-heading {
+  font-weight: bold;
+  font-size: 35px;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+.partner-image {
+  margin: 10px 0;
+  border-radius: 50%;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.partner-content {
+  text-align: center;
+}
+
+.partner-link {
+  margin: 10px 0;
+  display: inline-block;
+  padding: 10px;
+  background-color: #3CB371;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.partner-link:hover {
+  background-color: #45a049; /* Зеленый цвет кнопки при наведении */
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+}
+</style>

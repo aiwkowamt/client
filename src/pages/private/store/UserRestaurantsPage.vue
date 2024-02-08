@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container">
     <h1>Список Ресторанов</h1>
     <div class="row">
@@ -20,9 +21,10 @@
 <script>
 import AxiosInstance from "@/services/AxiosInstance.js";
 import Header from "@/components/Header.vue";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
-  components: {Header},
+  components: {NewHeader, Header},
   data() {
     return {
       restaurants: [],

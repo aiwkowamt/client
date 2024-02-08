@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container">
     <form @submit.prevent="createRestaurant" enctype='multipart/form-data'>
       <div class="form-group">
@@ -52,9 +53,10 @@ import AxiosInstance from "@/services/AxiosInstance.js";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 import Header from "@/components/Header.vue";
 import router from "@/router.js";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
-  components: {Header},
+  components: {NewHeader, Header},
   mixins: [ValidatorMixin],
   data() {
     return {

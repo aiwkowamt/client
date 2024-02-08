@@ -1,5 +1,6 @@
 <template>
-  <Header></Header>
+<!--  <Header></Header>-->
+  <NewHeader></NewHeader>
   <div class="container">
     <form>
       <div class="form-group">
@@ -59,11 +60,12 @@
 import AxiosInstance from "@/services/AxiosInstance.js";
 import Header from "@/components/Header.vue";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
+import NewHeader from "@/components/NewHeader.vue";
 
 export default {
   mixins: [ValidatorMixin],
   name: "DishCreatePage",
-  components: {Header},
+  components: {NewHeader, Header},
 
   props: {
     restaurant_id: {

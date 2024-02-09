@@ -70,24 +70,61 @@ export default {
 
     initAutocomplete() {
       const input = document.getElementById('address');
-      const autocomplete = new google.maps.places.Autocomplete(input);
+      const options = {
+        componentRestrictions: { country: 'ua' },
+        fields: ['formatted_address', 'geometry', 'name'],
+        strictBounds: true
+      };
+      const autocomplete = new google.maps.places.Autocomplete(input, options);
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (!place.geometry || !place.geometry.location) {
-          this.user.address = '';
+          this.address = '';
           return;
         }
-        this.user.address = place.formatted_address;
+        this.address = place.formatted_address;
       });
     },
 
     editUser() {
-      this.addressError = this.validator(this.user.address, 'required|min:5|max:50|include:Украина');
+      if (this.user.address) {
+        // Используем геокодирование для получения информации о местоположении
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address: this.user.address }, (results, status) => {
+          if (status === 'OK' && results[0]) {
+            // Проверяем страну полученного местоположения
+            const country = results[0].address_components.find(component =>
+                component.types.includes('country') && component.short_name === 'UA'
+            );
+            if (!country) {
+              // Если страна не Украина, устанавливаем ошибку адреса
+              this.addressError = 'Адрес должен быть в Украине';
+              return;
+            }
+            // Если адрес в Украине, выполняем обновление пользователя
+            this.addressError = '';
+            this.updateUser();
+          } else {
+            // Если геокодирование не удалось, устанавливаем ошибку адреса
+            this.addressError = 'Неправильный адрес';
+          }
+        });
+      } else {
+        this.updateUser();
+      }
+    },
+    updateUser() {
       this.phoneError = this.validator(this.user.phone, 'required|integer|size:10')
       if (!this.addressError && !this.phoneError) {
         console.log(this.user);
         AxiosInstance.put(`/user/${this.user.id}`, this.user)
+            .then(() => {
+              // Обработка успешного обновления пользователя
+            })
+            .catch(error => {
+              // Обработка ошибки при обновлении пользователя
+            });
       }
     },
   },

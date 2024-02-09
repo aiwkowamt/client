@@ -4,7 +4,7 @@
   <div class="footer">
     <div v-if="role === 'customer'" class="partner-block">
       <div class="partner-heading">Стать партнёром</div>
-      <img src="../../../public/element_1.png" class="partner-image">
+      <img src="../../../public/partner.png" class="partner-image">
       <div class="partner-content">
         <div class="partner-text">
           Ускоряйте рост бизнеса вместе с нами! Наши технологии и база пользователей - идеальный рецепт для увеличения

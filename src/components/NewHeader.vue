@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-warning shadow-lg">
+  <nav class="navbar navbar-expand-lg navbar-light bg-warning shadow">
     <div class="container">
 
       <router-link class="navbar-brand" to="/">DeliveryFood</router-link>
@@ -106,6 +106,7 @@ export default {
 
 i{
   font-weight: 800;
+  font-style: normal;
 }
 
 .navbar-brand{
@@ -113,5 +114,15 @@ i{
   font-size: 60px;
   text-decoration: none;
   text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link{
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  color: black;
+  transition: color 0.3s ease;
+}
+.nav-link:hover{
+  color: white;
 }
 </style>

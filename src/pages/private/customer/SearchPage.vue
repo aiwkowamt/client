@@ -13,21 +13,25 @@
     </form>
 
     <!-- Список магазинов -->
-    <ul class="list-unstyled">
-      <li v-for="restaurant in restaurants" :key="restaurant.id" class="mb-3">
-        <div class="card">
-          <div class="card-body d-flex">
-            <img :src="getRestaurantImageUrl(restaurant.image_path)" class="rounded-circle mr-3" alt="Restaurant Image" style="width: 100px; height: 100px;">
-            <div>
-              <h3 class="card-title">{{ restaurant.name }}</h3>
-              <p class="card-text">{{ restaurant.address }}</p>
-              <p class="card-text">Средний рейтинг: {{restaurant.average_rating}}</p>
-              <router-link :to="`/restaurant-dishes/${restaurant.id}`" class="btn btn-primary">Перейти</router-link>
-            </div>
+    <div class="row">
+      <div class="col-md-4 mb-3" v-for="restaurant in restaurants" :key="restaurant.id">
+        <div class="card h-100 position-relative" @click="goToRestaurant(restaurant.id)">
+
+          <img :src="getRestaurantImageUrl(restaurant.image_path)" class="card-img-top" alt="Restaurant Image">
+
+          <div class="rating-badge" :class="calculatePercentage(restaurant.average_rating).colorClass">
+            <i class="bi bi-hand-thumbs-up-fill"></i>
+            <span class="raiting-text">{{ calculatePercentage(restaurant.average_rating).percentage }} %</span>
           </div>
+
+          <div class="card-body">
+            <h5 class="card-title">{{ restaurant.name }}</h5>
+            <p class="card-text text-muted">{{ restaurant.address }}</p>
+          </div>
+
         </div>
-      </li>
-    </ul>
+      </div>
+    </div>
 
     <!-- Пагинация -->
     <nav v-if="pagination.last_page > 1" aria-label="Page navigation">
@@ -108,11 +112,33 @@ export default {
     clearSearch() {
       this.searchQuery.name = '';
     },
+
+    calculatePercentage(rating) {
+      if (rating !== undefined && rating !== null) {
+        const percentage = Math.round((rating / 5) * 100);
+        if (percentage >= 1 && percentage <= 20) {
+          return { colorClass: 'text-danger', percentage: percentage };
+        } else if (percentage > 20 && percentage <= 40) {
+          return { colorClass: 'text-warning', percentage: percentage };
+        } else if (percentage > 40 && percentage <= 60) {
+          return { colorClass: 'text-orange', percentage: percentage };
+        } else if (percentage > 60 && percentage <= 80) {
+          return { colorClass: 'text-success', percentage: percentage };
+        } else if (percentage > 80 && percentage <= 100) {
+          return { colorClass: 'text-primary', percentage: percentage };
+        }
+      }
+      return { colorClass: 'text-black', percentage: '?' };
+    },
+
+    goToRestaurant(restaurantId) {
+      router.push(`/restaurant-dishes/${restaurantId}`);
+    },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .search-form {
   display: flex;
   align-items: center;
@@ -148,6 +174,48 @@ export default {
 
 .search-button {
   display: none;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+  transform-origin: center bottom;
+  transition: transform 0.3s ease;
+}
+
+
+.rating-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  background-color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: #000;
+}
+
+.card-title{
+  font-weight: 800;
+}
+
+.raiting-text{
+  margin-left: 5px;
+}
+
+.card {
+  border: none;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card-body{
+  padding: 0;
+  margin-top: 10px;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.1);
 }
 
 </style>

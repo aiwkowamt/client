@@ -8,10 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery</title>
 </head>
-<body style="overflow-y: scroll;">
+<body>
 
 <div id="app"></div>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoYQGQQAGlXA4KgLHQ7l04vlEhsBl61oI&libraries=places" loading="async"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoYQGQQAGlXA4KgLHQ7l04vlEhsBl61oI&libraries=places"></script>
 <script type="module" src="/src/main.js"></script>
 </body>
+<style>
+    .pac-container {
+        z-index: 9999 !important;
+    }
+
+    body {
+        overflow-y: scroll;
+    }
+</style>
 </html>

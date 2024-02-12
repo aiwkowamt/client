@@ -41,7 +41,7 @@
                 </div>
                 <div class="text-danger" v-if="passwordError">{{ passwordError }}</div>
               </div>
-              <!--      <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>-->
+              <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
 
               <button class="btn btn-primary w-100 mt-3 shadow" @click.prevent="sendCredentials">LOGIN</button>
             </form>
@@ -66,10 +66,9 @@ export default {
     return {
       email: '',
       password: '',
-      passwordError: null,
-      emailError: null,
 
-      // authLoginError: null,
+      passwordError: '',
+      emailError: '',
     };
   },
 
@@ -92,17 +91,19 @@ export default {
   watch: {
     email(newValue) {
       this.emailError = this.validator(newValue, 'required|email|min:5|max:30');
+      useAuthStore().loginError = '';
     },
 
     password(newValue) {
       this.passwordError = this.validator(newValue, 'required|min:5|max:30');
+      useAuthStore().loginError = '';
     },
   },
 
-  // computed: {
-  //   authLoginError() {
-  //     return useAuthStore().getLoginError;
-  //   },
-  // },
+  computed: {
+    authLoginError() {
+      return useAuthStore().getLoginError;
+    },
+  },
 };
 </script>

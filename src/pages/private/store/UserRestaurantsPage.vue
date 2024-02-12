@@ -1,8 +1,7 @@
 <template>
 <!--  <Header></Header>-->
   <NewHeader></NewHeader>
-  <div class="container">
-    <h1>Список Ресторанов</h1>
+  <div class="container mt-3">
     <div class="row">
       <div v-for="restaurant in restaurants" :key="restaurant.id" class="col-md-4 mb-4">
         <div class="card">

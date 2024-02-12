@@ -1,7 +1,46 @@
 <template>
   <NewHeader/>
   <!--  <Header></Header>-->
-  <div class="footer">
+  <div v-if="role === 'customer'" class="container mt-5">
+    <img src="../../../public/recommendation.png" alt="Заведения которые могут вам понравиться">
+    <span class="fs-3 fw-bold ms-3">Предложения блюд основаны на предварительных заказах и предпочтениях</span>
+
+    <div class="row mt-3" v-if="dishes && dishes.length > 0">
+      <div class="col-md-12">
+        <div class="row">
+          <router-link :to="'/restaurant-dishes/' + dish.restaurant_id" v-for="dish in dishes" :key="dish.id" class="col-md-6 mb-4 text-decoration-none">
+            <div class="card h-100">
+              <div class="row g-0">
+                <div class="col-md-4 p-3">
+                  <img :src="getDishImageUrl(dish.image_path)" class="small-image" alt="Фото блюда">
+                </div>
+                <div class="col-md-8 pt-3 pe-3">
+                  <div>
+                    <div class="fw-bold fs-5">{{ dish.name }}</div>
+                    <div class="bg-warning fw-bold rounded-1 text-center d-inline-block ps-1 pe-1">{{ dish.category.name }}</div>
+                    <div class="text-muted">{{ dish.description }}</div>
+                    <div>{{ dish.price }}₴</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-5" v-else>
+      <div class="col-md-12">
+        <div class="fs-5 text-muted">Здесь будут ваши рекомендации</div>
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <div class="container mt-3 mb-3">
+    <div class="row justify-content-center">
     <div v-if="role === 'customer'" class="partner-block">
       <div class="partner-heading">Стать партнёром</div>
       <img src="../../../public/partner.png" class="partner-image">
@@ -13,7 +52,9 @@
         <router-link to="/declaration-create" class="partner-link">Регистрация заявки</router-link>
       </div>
     </div>
+    </div>
   </div>
+
 
 </template>
 
@@ -29,12 +70,13 @@ export default {
     return {
       user: null,
       role: '',
+      dishes: [],
     };
   },
 
   mounted() {
     this.getUser();
-    this.rofl();
+    this.getDishRecommendations();
   },
 
   methods: {
@@ -45,33 +87,22 @@ export default {
             this.user = response.data.user;
           })
     },
-    rofl() {
-      const origin = 'Славянск, Донецкая область, Украина';
-      const destination = 'Краматорск, Донецкая область, Украина';
 
-      const service = new google.maps.DistanceMatrixService();
+    getDishRecommendations() {
+      AxiosInstance.get('/dish-recommendations')
+          .then((response) => {
+            this.dishes = response.data.dishes;
+          })
+    },
 
-      const request = {
-        origins: [origin],
-        destinations: [destination],
-        travelMode: 'DRIVING', // или 'WALKING', 'BICYCLING', 'TRANSIT'
-      };
-
-      service.getDistanceMatrix(request, (response) => {
-        const distance = response.rows[0].elements[0].distance.text;
-        const duration = response.rows[0].elements[0].duration.text;
-
-        console.log('Расстояние:', distance);
-        console.log('Время:', duration);
-
-      });
-
-    }
+    getDishImageUrl(imagePath) {
+      return imagePath ? `http://localhost:8080/storage/${imagePath}` : '';
+    },
   }
 };
 </script>
 
-<style>
+<style scoped>
 .partner-block {
   text-align: center;
   display: flex;
@@ -109,14 +140,22 @@ export default {
 }
 
 .partner-link:hover {
-  background-color: #45a049; /* Зеленый цвет кнопки при наведении */
+  background-color: #45a049;
 }
 
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #f8f9fa;
+.small-image {
+  width: 110px;
+  height: 110px;
+  border-radius: 10px;
 }
+
+.card {
+  transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
 </style>

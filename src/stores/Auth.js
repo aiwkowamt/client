@@ -6,12 +6,12 @@ import Cookies from 'js-cookie';
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         token: Cookies.get("token"),
-        // loginError: null,
+        loginError: '',
     }),
 
     getters: {
         loggedIn: (state) => state.token != null,
-        // getLoginError: (state) => state.loginError,
+        getLoginError: (state) => state.loginError,
     },
 
     actions: {
@@ -23,9 +23,9 @@ export const useAuthStore = defineStore('auth', {
                     router.push("/");
                     location.reload();
                 })
-                // .catch((err)=>{
-                //     this.loginError = err.response.data.message;
-                // })
+                .catch((err)=>{
+                    this.loginError = err.response.data.message;
+                })
         },
 
         registerUser(data) {

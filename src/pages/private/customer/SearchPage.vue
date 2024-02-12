@@ -1,19 +1,35 @@
 <template>
-<!--  <Header></Header>-->
+  <!--  <Header></Header>-->
   <NewHeader/>
 
   <div class="container">
     <!-- Поиск -->
-    <form @submit.prevent="searchRestaurants" class="search-form mb-3 mt-3">
-      <div class="search-input-container">
-        <input type="text" v-model="searchQuery.name" placeholder="Поиск" class="search-input">
-        <i v-if="searchQuery.name" class="clear-icon bi bi-x-lg" @click="clearSearch"></i>
+    <form @submit.prevent="searchRestaurants" class="mb-3 mt-3">
+      <div class="row">
+        <div class="col">
+          <input type="text" v-model="searchQuery.name" id="searchInput" placeholder="Поиск" class="form-control">
+          <select v-model="searchQuery.sortBy" id="sortBySelect" class="form-select mt-3">
+            <option value="">Сортировка по умолчанию</option>
+            <option value="rating">Сортировка по рейтингу</option>
+            <option value="orders_count">Сортировка по количеству заказов</option>
+          </select>
+          <div class="btn-group mt-3"  style="width: 100%;">
+            <button type="submit" class="btn btn-warning" style="width: 80%;">Поиск</button>
+            <button @click.prevent="clearSearch" class="btn btn-outline-dark">Сбросить</button>
+          </div>
+        </div>
+
+        <div class="col">
+          <select v-model="searchQuery.categories" multiple id="categories" class="form-select" style="height: 100%">
+            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+          </select>
+        </div>
       </div>
-      <button type="submit" class="search-button"></button>
     </form>
 
+
     <!-- Список магазинов -->
-    <div class="row">
+    <div class="row" v-if="restaurants && restaurants.length > 0">
       <div class="col-md-4 mb-3" v-for="restaurant in restaurants" :key="restaurant.id">
         <div class="card h-100 position-relative" @click="goToRestaurant(restaurant.id)">
 
@@ -22,6 +38,7 @@
           <div class="rating-badge" :class="calculatePercentage(restaurant.average_rating).colorClass">
             <i class="bi bi-hand-thumbs-up-fill"></i>
             <span class="raiting-text">{{ calculatePercentage(restaurant.average_rating).percentage }} %</span>
+            <span class="text-muted" style="font-size: 13px;"> ({{ restaurant.comments_count }})</span>
           </div>
 
           <div class="card-body">
@@ -33,10 +50,18 @@
       </div>
     </div>
 
+    <div class="d-flex flex-column align-items-center mt-5" v-else>
+      <div>
+        <img src="../../../../public/empty_search.png">
+        <div @click="clearSearch" class="fs-5 text-uppercase fw-bold text-success mt-3" style="cursor: pointer">Показать все заведения</div>
+      </div>
+    </div>
+
     <!-- Пагинация -->
     <nav v-if="pagination.last_page > 1" aria-label="Page navigation">
       <ul class="pagination">
-        <li class="page-item" v-for="page in pagination.last_page" :key="page" :class="{ 'active': page === pagination.current_page }">
+        <li class="page-item" v-for="page in pagination.last_page" :key="page"
+            :class="{ 'active': page === pagination.current_page }">
           <a class="page-link" @click.prevent="changePage(page)" href="#">{{ page }}</a>
         </li>
       </ul>
@@ -56,10 +81,14 @@ export default {
   data() {
     return {
       restaurants: [],
+      categories: [],
+
       pagination: {},
       searchQuery: {
         name: '',
         page: 1,
+        sortBy: '',
+        categories: [],
       },
       averageRatings: {},
     };
@@ -68,22 +97,18 @@ export default {
   mounted() {
     const queryParams = this.$route.query;
     this.searchQuery.name = queryParams.name || '';
+    this.searchQuery.sortBy = queryParams.sortBy || '';
+    this.searchQuery.categories = Array.isArray(queryParams.categories) ? queryParams.categories : (queryParams.categories ? queryParams.categories.split(',') : []);
     this.searchQuery.page = queryParams.page || '';
 
     this.searchRestaurants();
+    this.getCategories();
   },
-
-  // watch: {
-  //   '$route.query.name': function (newName, oldName) {
-  //     if (newName !== oldName) {
-  //       this.searchQuery.page = 1;
-  //       this.searchRestaurants();
-  //     }
-  //   }
-  // },
 
   methods: {
     searchRestaurants() {
+      console.log(this.searchQuery);
+
       AxiosInstance.get(`/restaurants-search`, {params: this.searchQuery})
           .then(response => {
             this.restaurants = response.data.restaurants.data;
@@ -109,72 +134,48 @@ export default {
       return imagePath ? `http://localhost:8080/storage/${imagePath}` : '';
     },
 
-    clearSearch() {
-      this.searchQuery.name = '';
-    },
-
     calculatePercentage(rating) {
       if (rating !== undefined && rating !== null) {
         const percentage = Math.round((rating / 5) * 100);
         if (percentage >= 1 && percentage <= 20) {
-          return { colorClass: 'text-danger', percentage: percentage };
+          return {colorClass: 'text-danger', percentage: percentage};
         } else if (percentage > 20 && percentage <= 40) {
-          return { colorClass: 'text-warning', percentage: percentage };
+          return {colorClass: 'text-warning', percentage: percentage};
         } else if (percentage > 40 && percentage <= 60) {
-          return { colorClass: 'text-orange', percentage: percentage };
+          return {colorClass: 'text-orange', percentage: percentage};
         } else if (percentage > 60 && percentage <= 80) {
-          return { colorClass: 'text-success', percentage: percentage };
+          return {colorClass: 'text-success', percentage: percentage};
         } else if (percentage > 80 && percentage <= 100) {
-          return { colorClass: 'text-primary', percentage: percentage };
+          return {colorClass: 'text-primary', percentage: percentage};
         }
       }
-      return { colorClass: 'text-black', percentage: '?' };
+      return {colorClass: 'text-black', percentage: '?'};
     },
 
     goToRestaurant(restaurantId) {
       router.push(`/restaurant-dishes/${restaurantId}`);
     },
+
+    getCategories() {
+      AxiosInstance.get(`/categories`)
+          .then((response) => {
+            this.categories = response.data.categories;
+          })
+    },
+
+    clearSearch() {
+      this.searchQuery.name = '';
+      this.searchQuery.sortBy = '';
+      this.searchQuery.categories = [];
+      this.searchQuery.page = '';
+
+      this.searchRestaurants();
+    }
   },
 };
 </script>
 
 <style scoped>
-.search-form {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.search-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  border: none;
-  border-radius: 20px;
-  padding: 8px 36px 8px 16px;
-  width: 300px;
-  background-color: white;
-  border: 2px solid #ccc;
-  border-radius: 20px;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #333;
-}
-
-.clear-icon {
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-}
-
-.search-button {
-  display: none;
-}
 
 .card-img-top {
   height: 200px;
@@ -182,7 +183,6 @@ export default {
   transform-origin: center bottom;
   transition: transform 0.3s ease;
 }
-
 
 .rating-badge {
   position: absolute;
@@ -195,11 +195,11 @@ export default {
   color: #000;
 }
 
-.card-title{
+.card-title {
   font-weight: 800;
 }
 
-.raiting-text{
+.raiting-text {
   margin-left: 5px;
 }
 
@@ -209,7 +209,7 @@ export default {
   cursor: pointer;
 }
 
-.card-body{
+.card-body {
   padding: 0;
   margin-top: 10px;
 }

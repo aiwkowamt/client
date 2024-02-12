@@ -10,6 +10,7 @@
         <div class="row mt-5">
           <div class="col-md-12">
             <div class="row">
+              <div class="fw-bold text-uppercase fs-3 mb-3">{{ restaurant ? restaurant.name : 'Загрузка...' }}</div>
               <div v-for="dish in dishes" :key="dish.id" class="col-md-6 mb-4">
                 <div class="card h-100">
                   <div class="row g-0">
@@ -17,16 +18,19 @@
                       <img :src="getDishImageUrl(dish.image_path)" class="small-image " alt="Фото блюда">
                     </div>
                     <div class="col-md-8 pt-3 pe-3">
-                      <div >
+                      <div>
                         <div class="fw-bold fs-5">{{ dish.name }}</div>
-                        <div class="bg-warning fw-bold rounded-1 text-center d-inline-block ps-1 pe-1">{{ dish.category.name }}</div>
+                        <div class="bg-warning fw-bold rounded-1 text-center d-inline-block ps-1 pe-1">
+                          {{ dish.category.name }}
+                        </div>
                         <div class="text-muted">{{ dish.description }}</div>
                       </div>
                     </div>
                     <div class="ps-3 pe-3 pb-3">
                       <div class="d-flex justify-content-between">
                         <div>{{ dish.price }}₴</div>
-                        <div @click.prevent="addToCart(dish)" class="text-end"><i class="bi bi-plus-lg custom-plus-button"></i></div>
+                        <div @click.prevent="addToCart(dish)" class="text-end"><i
+                            class="bi bi-plus-lg custom-plus-button"></i></div>
                       </div>
                     </div>
                   </div>
@@ -89,7 +93,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <div class="fs-5">{{ restaurant ? restaurant.name : 'Загрузка...' }} </div>
+              <div class="fs-5">{{ restaurant ? restaurant.name : 'Загрузка...' }}</div>
 
               <ul class="list-group">
                 <li v-for="(item, index) in filteredCart" :key="index" class="list-group-item">
@@ -118,7 +122,9 @@
             </div>
             <div class="modal-footer">
               <div data-bs-dismiss="modal" class="custom-btn-think">Подумать еще</div>
-              <div @click="confirmOrder" data-bs-dismiss="modal" aria-label="Close" class="custom-btn-address">Подтвердить адресс</div>
+              <div @click="confirmOrder" data-bs-dismiss="modal" aria-label="Close" class="custom-btn-address">
+                Подтвердить адресс
+              </div>
             </div>
           </div>
         </div>
@@ -152,6 +158,7 @@ export default {
       restaurant: null,
       dishes: [],
       cart: JSON.parse(localStorage.getItem('cart')) || [],
+
       address: '',
       addressError: '',
     };
@@ -248,6 +255,24 @@ export default {
           dish_id: item.dish.id,
           quantity: item.quantity
         }))
+
+        const origin = this.restaurant.address;
+        const destination = this.address;
+        const service = new google.maps.DistanceMatrixService();
+        const request = {
+          origins: [origin],
+          destinations: [destination],
+          travelMode: 'DRIVING', // или 'WALKING', 'BICYCLING', 'TRANSIT'
+        };
+        service.getDistanceMatrix(request, (response) => {
+          const distance = response.rows[0].elements[0].distance.text;
+          const duration = response.rows[0].elements[0].duration.text;
+          console.log(origin);
+          console.log(destination);
+          console.log('Расстояние:', distance);
+          console.log('Время:', duration);
+        });
+
         const data = {
           restaurant_id: this.restaurant_id,
           items,
@@ -346,16 +371,18 @@ export default {
   transform: scale(1.03);
   cursor: pointer;
 }
-.custom-btn-think:hover{
+
+.custom-btn-think:hover {
   cursor: pointer;
   background-color: #DCDCDC;
 }
-.custom-btn-address:hover{
+
+.custom-btn-address:hover {
   cursor: pointer;
   background-color: #66CDAA;
 }
 
-.custom-btn-think{
+.custom-btn-think {
   background-color: #F5F5F5;
   color: black;
   text-align: center;
@@ -363,7 +390,8 @@ export default {
   font-size: 16px;
   padding: 3px;
 }
-.custom-btn-address{
+
+.custom-btn-address {
   background-color: #20B2AA;
   color: #fff;
   text-align: center;

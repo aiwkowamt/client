@@ -4,3 +4,10 @@
 * {
     font-family: 'Mulish', sans-serif;
 }
+
+.pac-container {
+    z-index: 9999 !important;
+}
+body {
+    overflow-y: scroll;
+}

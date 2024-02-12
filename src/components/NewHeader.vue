@@ -41,7 +41,7 @@
               <li v-if="!isLoggedIn"><router-link class="dropdown-item" to="/login">Логин</router-link></li>
               <li v-if="isLoggedIn && role === 'customer'"><router-link class="dropdown-item" to="/orders/pending">Мои заказы</router-link></li>
               <li v-if="isLoggedIn && role === 'customer'"><router-link class="dropdown-item" to="/settings">Настройки</router-link></li>
-              <li><hr class="dropdown-divider"></li>
+<!--              <li><hr class="dropdown-divider"></li>-->
               <li><a v-if="isLoggedIn" @click.prevent="preventLogoutUser" class="dropdown-item" href="#">Выйти</a></li>
             </ul>
           </li>
@@ -71,7 +71,9 @@ export default {
   },
 
   mounted() {
-    this.getUserRole();
+    if (useAuthStore().loggedIn) {
+      this.getUserRole();
+    }
   },
 
   methods: {
@@ -82,7 +84,8 @@ export default {
           .then((response) => {
             this.role = response.data.user.role.name;
             this.user = response.data.user;
-          });
+          })
+          .catch(()=>{})
     },
 
     preventLogoutUser() {

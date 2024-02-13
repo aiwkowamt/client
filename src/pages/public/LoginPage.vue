@@ -43,6 +43,8 @@
               </div>
               <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
 
+              <img src="../../../public/github_logo.png" style="width:40px; height:40px; cursor:pointer;" class="mt-3" @click="github">
+
               <button class="btn btn-primary w-100 mt-3 shadow" @click.prevent="sendCredentials">LOGIN</button>
             </form>
           </div>
@@ -58,6 +60,9 @@ import {mapActions} from "pinia";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 import Header from "@/components/Header.vue";
 import NewHeader from "@/components/NewHeader.vue";
+import AxiosInstance from "@/services/AxiosInstance.js";
+import Cookies from "js-cookie";
+import router from "@/router.js";
 
 export default {
   components: {NewHeader, Header},
@@ -86,6 +91,16 @@ export default {
         this.loginUser(userData);
       }
     },
+
+    github(){
+      AxiosInstance.get("/sign-in/github")
+          .then((response)=>{
+            window.location.href = response.data.url;
+          })
+          .catch((error)=>{
+            console.log(error);
+          })
+    }
   },
 
   watch: {

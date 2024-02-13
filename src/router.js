@@ -96,8 +96,8 @@ const routes = [
     },
 
     {
-        path: "/sign-in/github/redirect",
-        name: "sign-in/github/redirect",
+        path: "/authorize/github/callback",
+        name: "LoginGithub",
         component: () => import("@/pages/private/LoginGitHub.vue"),
     },
 

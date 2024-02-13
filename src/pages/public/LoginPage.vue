@@ -43,7 +43,7 @@
               </div>
               <div class="text-danger" v-if="authLoginError">{{ authLoginError }}</div>
 
-              <img src="../../../public/github_logo.png" style="width:40px; height:40px; cursor:pointer;" class="mt-3" @click="github">
+              <img src="../../../public/github_logo.png" style="width:40px; height:40px; cursor:pointer;" class="mt-3" @click="loginGithub">
 
               <button class="btn btn-primary w-100 mt-3 shadow" @click.prevent="sendCredentials">LOGIN</button>
             </form>
@@ -92,10 +92,12 @@ export default {
       }
     },
 
-    github(){
-      AxiosInstance.get("/sign-in/github")
+    loginGithub(){
+      AxiosInstance.get("/authorize/github/redirect")
           .then((response)=>{
-            window.location.href = response.data.url;
+            if(response.data.url){
+              window.location.href = response.data.url;
+            }
           })
           .catch((error)=>{
             console.log(error);

@@ -47,5 +47,16 @@ export const useAuthStore = defineStore('auth', {
                     location.reload();
                 })
         },
+
+        loginGithubCallback(code) {
+            AxiosInstance.get(`authorize/github/callback?code=${code}`)
+                .then((response) => {
+                    this.token = response.data.token;
+                    Cookies.set("token", this.token);
+                    router.push('/');
+                    // location.reload();
+                })
+
+        },
     },
 })

@@ -2,7 +2,7 @@
 <!--  <Header></Header>-->
   <NewHeader></NewHeader>
   <div class="container">
-    <button class="btn btn-primary" @click="getPDF">PDF комментарии</button>
+    <button class="btn btn-primary" @click="getPDF">получить PDF</button>
     <form>
       <label for="editedName">Название:</label>
       <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
@@ -57,6 +57,9 @@ import AxiosInstance from "@/services/AxiosInstance.js";
 import Header from "@/components/Header.vue";
 import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 import NewHeader from "@/components/NewHeader.vue";
+import Cookies from "js-cookie";
+import Pusher from "pusher-js";
+import Echo from "laravel-echo";
 
 export default {
   mixins: [ValidatorMixin],
@@ -71,9 +74,9 @@ export default {
   data() {
     return {
       restaurant: {
-        name: "",
-        address: "",
-        phone: "",
+        name: '',
+        address: '',
+        phone: '',
       },
       dishes: [],
       orders: [],
@@ -84,6 +87,28 @@ export default {
     this.getRestaurant(this.id);
     this.getRestaurantDishes(this.id);
     this.getRestaurantOrders(this.id);
+
+    const token = Cookies.get('token');
+
+    window.Pusher = Pusher;
+
+    window.Echo = new Echo({
+      authEndpoint : 'http://localhost:8080/broadcasting/auth',
+      broadcaster: 'pusher',
+      key: '1b05206a9f85875c6901',
+      cluster: 'eu',
+      forceTLS: true,
+      auth: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    window.Echo.channel('channel-pdf')
+        .listen('PDFGeneration', (event) => {
+          console.log('Перемога ', event.fileUrl);
+        });
   },
 
   methods: {
@@ -128,14 +153,13 @@ export default {
       AxiosInstance.put(`/orders/${orderId}`, { status })
     },
 
-    getPDF(){
-      const restaurant_id = this.id
-      console.log(restaurant_id);
-      AxiosInstance.get('/generate-pdf-comments', restaurant_id)
-          .then((response)=>{
+    getPDF() {
+      AxiosInstance.get(`/generate-pdf-comments/${this.id}`)
+          .then((response) => {
             console.log(response.data);
           });
     }
+
   },
 };
 </script>

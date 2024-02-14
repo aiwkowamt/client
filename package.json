@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",
+    "laravel-echo": "^1.15.3",
+    "pusher-js": "^8.4.0-rc2",
     "vite": "^5.0.11"
   }
 }

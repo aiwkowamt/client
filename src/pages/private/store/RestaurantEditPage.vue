@@ -2,7 +2,7 @@
 <!--  <Header></Header>-->
   <NewHeader></NewHeader>
   <div class="container">
-    <h1>Ресторан</h1>
+    <button class="btn btn-primary" @click="getPDF">PDF комментарии</button>
     <form>
       <label for="editedName">Название:</label>
       <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
@@ -127,6 +127,15 @@ export default {
     updateOrderStatus(orderId, status) {
       AxiosInstance.put(`/orders/${orderId}`, { status })
     },
+
+    getPDF(){
+      const restaurant_id = this.id
+      console.log(restaurant_id);
+      AxiosInstance.get('/generate-pdf-comments', restaurant_id)
+          .then((response)=>{
+            console.log(response.data);
+          });
+    }
   },
 };
 </script>

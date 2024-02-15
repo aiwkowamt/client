@@ -122,9 +122,10 @@
             </div>
             <div class="modal-footer">
               <div data-bs-dismiss="modal" class="custom-btn-think">Подумать еще</div>
-              <div @click="confirmOrder" data-bs-dismiss="modal" aria-label="Close" class="custom-btn-address">
+              <div @click="confirmOrder" class="custom-btn-address">
                 Подтвердить адресс
               </div>
+<!--              data-bs-dismiss="modal" aria-label="Close"-->
             </div>
           </div>
         </div>
@@ -248,54 +249,72 @@ export default {
     },
 
     confirmOrder() {
-      this.addressError = this.validator(this.address, 'required|min:5|max:50');
-      if (!this.addressError) {
-        const restaurantFilteredCart = this.cart.filter(item => item.dish.restaurant_id === parseInt(this.restaurant_id));
-        const items = restaurantFilteredCart.map(item => ({
-          dish_id: item.dish.id,
-          quantity: item.quantity
-        }))
+      if (this.address.trim() === '') {
+        this.addressError = 'Адрес должен быть в Украине';
+      } else {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({address: this.address}, (results, status) => {
+          if (status !== 'OK') {
+            this.addressError = 'Несуществующий адрес';
+            return;
+          }
+          const country = results[0].address_components.find(component =>
+              component.types.includes('country') && component.short_name === 'UA'
+          );
+          if (!country) {
+            this.addressError = 'Адрес должен быть в Украине';
+            return;
+          }
+          this.address = results[0].formatted_address;
 
-        const origin = this.restaurant.address;
-        const destination = this.address;
-        const service = new google.maps.DistanceMatrixService();
-        const request = {
-          origins: [origin],
-          destinations: [destination],
-          travelMode: 'DRIVING', // или 'WALKING', 'BICYCLING', 'TRANSIT'
-        };
-        service.getDistanceMatrix(request, (response) => {
-          const distance = response.rows[0].elements[0].distance.text;
-          const duration = response.rows[0].elements[0].duration.text;
-          console.log(origin);
-          console.log(destination);
-          console.log('Расстояние:', distance);
-          console.log('Время:', duration);
+          const restaurantFilteredCart = this.cart.filter(item => item.dish.restaurant_id === parseInt(this.restaurant_id));
+          const items = restaurantFilteredCart.map(item => ({
+            dish_id: item.dish.id,
+            quantity: item.quantity
+          }))
+
+          const origin = this.restaurant.address;
+          const destination = this.address;
+          const service = new google.maps.DistanceMatrixService();
+          const request = {
+            origins: [origin],
+            destinations: [destination],
+            travelMode: 'DRIVING', // или 'WALKING', 'BICYCLING', 'TRANSIT'
+          };
+
+          service.getDistanceMatrix(request, (response) => {
+            const durationInMinutes = Math.round(response.rows[0].elements[0].duration.value / 60);
+
+            const data = {
+              restaurant_id: this.restaurant_id,
+              items,
+              delivery_duration: durationInMinutes,
+            };
+            console.log(data);
+            AxiosInstance.post('create-order', data)
+                .then(() => {
+                  this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));
+                  localStorage.setItem('cart', JSON.stringify(this.cart));
+                  location.reload();
+                })
+
+          });
         });
-
-        const data = {
-          restaurant_id: this.restaurant_id,
-          items,
-        };
-
-        AxiosInstance.post('create-order', data)
-            .then(() => {
-              this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));
-              localStorage.setItem('cart', JSON.stringify(this.cart));
-
-              router.push('/orders/pending');
-            })
       }
     },
 
     initAutocomplete() {
       const input = document.getElementById('address');
-      const autocomplete = new google.maps.places.Autocomplete(input);
+      const options = {
+        componentRestrictions: {country: 'ua'},
+        fields: ['formatted_address', 'geometry', 'name'],
+        strictBounds: true
+      };
+      const autocomplete = new google.maps.places.Autocomplete(input, options);
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) {
-          this.address = '';
+        if (!place.formatted_address) {
           return;
         }
         this.address = place.formatted_address;
@@ -308,7 +327,7 @@ export default {
   },
   watch: {
     address(newValue) {
-      this.addressError = this.validator(newValue, 'required|min:5|max:50');
+      this.addressError = '';
     },
   }
 };

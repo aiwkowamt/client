@@ -112,6 +112,12 @@ const routes = [
         name: "register",
         component: () => import("@/pages/public/RegisterPage.vue"),
     },
+
+    {
+        path: "/:catchAll(.*)",
+        name: "not-found",
+        component: () => import("@/pages/public/NotFoundPage.vue"),
+    },
 ];
 
 const router = createRouter({

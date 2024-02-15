@@ -36,6 +36,11 @@
     </div>
 
   </div>
+  <div v-if="role === 'store'" class="container mt-5">
+    <router-link to="/restaurant-create" class="text-decoration-none">
+      <h1 class="text-dark">Добавьте своё первое заведение</h1>
+    </router-link>
+  </div>
 
 
 

@@ -2,9 +2,9 @@
 <!--  <Header></Header>-->
   <NewHeader></NewHeader>
   <div class="container">
-    <form @submit.prevent="createRestaurant" enctype='multipart/form-data'>
+    <form @submit.prevent="createRestaurant" enctype='multipart/form-data' class="shadow p-3 rounded">
       <div class="form-group">
-        <label for="name">Name</label>
+        <label for="name" class="fw-bold">Название</label>
         <input
             type="text"
             v-model="name"
@@ -13,7 +13,7 @@
         <span v-if="nameError" class="text-danger">{{ nameError }}</span>
       </div>
       <div class="form-group">
-        <label for="address">Address</label>
+        <label for="address"  class="fw-bold">Адрес</label>
         <input
             type="text"
             v-model="address"
@@ -24,7 +24,7 @@
         <span v-if="addressError" class="text-danger">{{ addressError }}</span>
       </div>
       <div class="form-group">
-        <label for="phone">Phone</label>
+        <label for="phone" class="fw-bold">Телефон</label>
         <input
             type="text"
             v-model="phone"
@@ -33,7 +33,7 @@
         <span v-if="phoneError" class="text-danger">{{ phoneError }}</span>
       </div>
       <div class="form-group">
-        <label for="image">Image</label>
+        <label for="image" class="fw-bold">Заглавное фото</label>
         <input
             type="file"
             @change="handleImageChange($event)"
@@ -43,7 +43,7 @@
         <span v-if="imageError" class="text-danger">{{ imageError }}</span>
         <img v-if="image" :src="imageURL" alt="Selected Image" style="max-width: 200px; margin-top: 10px;">
       </div>
-      <button type="submit" class="btn btn-primary">Добавить</button>
+      <button type="submit" class="btn btn-dark mt-3">Добавить</button>
     </form>
   </div>
 </template>
@@ -83,7 +83,6 @@ export default {
   methods: {
     createRestaurant() {
       this.nameError = this.validator(this.name, 'required|min:5|max:10');
-      this.addressError = this.validator(this.address, 'required|min:5|max:50|include:Украина');
       this.phoneError = this.validator(this.phone, 'required|integer|size:10');
 
       if (!this.image) {
@@ -94,6 +93,26 @@ export default {
         this.imageError = 'Размер изображения не должен превышать 5 МБ';
       } else {
         this.imageError = '';
+      }
+
+      if (this.address.trim() === '') {
+        this.addressError = 'Адрес должен быть в Украине';
+      } else {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({address: this.address}, (results, status) => {
+          if (status !== 'OK') {
+            this.addressError = 'Несуществующий адрес';
+            return;
+          }
+          const country = results[0].address_components.find(component =>
+              component.types.includes('country') && component.short_name === 'UA'
+          );
+          if (!country) {
+            this.addressError = 'Адрес должен быть в Украине';
+            return;
+          }
+          this.address = results[0].formatted_address;
+        });
       }
 
       if (!this.nameError && !this.addressError && !this.phoneError) {
@@ -120,12 +139,16 @@ export default {
 
     initAutocomplete() {
       const input = document.getElementById('address');
-      const autocomplete = new google.maps.places.Autocomplete(input);
+      const options = {
+        componentRestrictions: {country: 'ua'},
+        fields: ['formatted_address', 'geometry', 'name'],
+        strictBounds: true
+      };
+      const autocomplete = new google.maps.places.Autocomplete(input, options);
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (!place.geometry || !place.geometry.location) {
-          this.address = '';
+        if (!place.formatted_address) {
           return;
         }
         this.address = place.formatted_address;
@@ -152,8 +175,8 @@ export default {
     name(newValue) {
       this.nameError = this.validator(newValue, 'required|min:5|max:10');
     },
-    address(newValue) {
-      this.addressError = this.validator(newValue, 'required|min:5|max:50|include:Украина');
+    address() {
+      this.addressError = '';
     },
     phone(newValue) {
       this.phoneError = this.validator(newValue, 'required|integer|size:10');

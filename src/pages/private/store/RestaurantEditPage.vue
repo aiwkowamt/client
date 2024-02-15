@@ -1,20 +1,55 @@
 <template>
-<!--  <Header></Header>-->
+  <!--  <Header></Header>-->
   <NewHeader></NewHeader>
-  <div class="container">
-    <button class="btn btn-primary" @click="getPDF">получить PDF</button>
+  <div class="container shadow p-4 rounded">
+    <div class="btn-group mt-3 shadow">
+      <button class="btn btn-danger" @click="getPDF" v-if="isVisiblePdfBtn">получить PDF</button>
+      <button type="submit" class="btn btn-dark">
+        <router-link :to="`/dish-create/${this.id}`" class="text-decoration-none text-white">Добавить позицию
+        </router-link>
+      </button>
+    </div>
+
     <form>
-      <label for="editedName">Название:</label>
-      <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
+      <div class="form-group mt-3">
+        <label for="editedName" class="fw-bold">Название:</label>
+        <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
+        <div v-if="nameError" class="text-danger">{{ nameError }}</div>
+      </div>
 
-      <label for="editedAddress">Адрес:</label>
-      <input v-model="restaurant.address" type="text" id="editedAddress" class="form-control">
+      <div class="form-group mt-3">
+        <label for="editedAddress" class="fw-bold">Адрес:</label>
+        <input type="text" class="form-control"
+               v-model="restaurant.address"
+               id="address"
+               @focus="initAutocomplete"
+        >
+        <div v-if="addressError" class="text-danger">{{ addressError }}</div>
+      </div>
 
-      <label for="editedPhone">Телефон:</label>
-      <input v-model="restaurant.phone" type="text" id="editedPhone" class="form-control">
+      <div class="form-group mt-3">
+        <label for="editedPhone" class="fw-bold">Телефон:</label>
+        <input v-model="restaurant.phone" type="text" id="editedPhone" class="form-control">
+        <div v-if="phoneError" class="text-danger">{{ phoneError }}</div>
+      </div>
 
-      <button type="submit" class="btn btn-primary" @click.prevent="updateRestaurant">Сохранить</button>
-      <router-link :to="`/dish-create/${this.id}`">Добавить позицию</router-link>
+      <div class="form-group mt-3">
+        <label for="image" class="fw-bold">Заглавное фото</label>
+        <input
+            type="file"
+            @change="handleImageChange($event)"
+            class="form-control"
+            name="image"
+        >
+        <div v-if="imageError" class="text-danger">{{ imageError }}</div>
+
+        <img :src="getRestaurantImageUrl(restaurant.image_path)" alt="Restaurant Image"
+             style="max-width: 200px; margin-top: 10px;">
+
+      </div>
+
+      <button type="submit" class="btn btn-dark shadow mt-3" @click.prevent="updateRestaurant">Сохранить</button>
+
     </form>
 
     <div v-if="dishes.length">
@@ -26,6 +61,9 @@
           <div>{{ dish.description }}</div>
         </li>
       </ul>
+    </div>
+    <div v-else>
+      <div class="mt-3 text-muted fw-bold fs-5">Добавьте позиции для даного ресторана</div>
     </div>
 
     <div v-for="order in orders" :key="order.id" class="card mb-3">
@@ -77,9 +115,20 @@ export default {
         name: '',
         address: '',
         phone: '',
+        image_path: '',
       },
+
+      image: null,
+
+      nameError: '',
+      addressError: '',
+      phoneError: '',
+      imageError: '',
+
       dishes: [],
       orders: [],
+
+      isVisiblePdfBtn: false,
     };
   },
 
@@ -93,7 +142,7 @@ export default {
     window.Pusher = Pusher;
 
     window.Echo = new Echo({
-      authEndpoint : 'http://localhost:8080/broadcasting/auth',
+      authEndpoint: 'http://localhost:8080/broadcasting/auth',
       broadcaster: 'pusher',
       key: '1b05206a9f85875c6901',
       cluster: 'eu',
@@ -107,7 +156,21 @@ export default {
 
     window.Echo.channel('channel-pdf')
         .listen('PDFGeneration', (event) => {
-          console.log('Перемога ', event.fileUrl);
+          const file_url = event.fileUrl;
+          this.isVisiblePdfBtn = true;
+          AxiosInstance.post('/download-pdf', {file_url}, {responseType: 'blob'})
+              .then((response) => {
+                let filename = "comments.pdf";
+                filename = decodeURI(filename);
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                window.URL.revokeObjectURL(url);
+                link.remove();
+              })
         });
   },
 
@@ -116,28 +179,79 @@ export default {
       AxiosInstance.get(`/restaurants/edit/${restaurant_id}`)
           .then((response) => {
             this.restaurant = response.data.restaurant;
+            console.log(this.restaurant.image_path);
           })
     },
 
     getRestaurantDishes(restaurant_id) {
       AxiosInstance.get(`/restaurant-dishes/${restaurant_id}`)
           .then((response) => {
-            this.dishes = response.data.dishes;
+            if (response.data.dishes) {
+              this.dishes = response.data.dishes;
+            }
           });
     },
 
     getRestaurantOrders(restaurant_id) {
       AxiosInstance.get(`/restaurant-orders/${restaurant_id}`)
           .then((response) => {
-            this.orders = response.data.orders;
+            if (response.data.orders) {
+              this.orders = response.data.orders;
+            }
           });
     },
 
     updateRestaurant() {
-      AxiosInstance.put(`/restaurants/${this.id}`, this.restaurant)
-          .then(() => {
-            this.$router.push('/user-restaurants');
-          })
+      this.nameError = this.validator(this.restaurant.name, 'required|min:5|max:100');
+      this.addressError = this.validator(this.restaurant.address, 'required');
+      this.phoneError = this.validator(this.restaurant.phone, 'required|integer|size:10');
+
+      this.addressError = '';
+      if (this.restaurant.address.trim() === '') {
+        this.addressError = 'Адрес должен быть в Украине';
+      } else {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({address: this.restaurant.address}, (results, status) => {
+          if (status !== 'OK') {
+            this.addressError = 'Несуществующий адрес';
+            return;
+          }
+          const country = results[0].address_components.find(component =>
+              component.types.includes('country') && component.short_name === 'UA'
+          );
+          if (!country) {
+            this.addressError = 'Адрес должен быть в Украине';
+            return;
+          }
+          this.restaurant.address = results[0].formatted_address;
+
+
+          if (!this.nameError && !this.addressError && !this.phoneError) {
+            // AxiosInstance.put(`/restaurants/${this.id}`, this.restaurant)
+            //     .then(() => {
+            //       this.$router.push('/user-restaurants');
+            //     })
+          }
+        });
+      }
+    },
+
+    initAutocomplete() {
+      const input = document.getElementById('address');
+      const options = {
+        componentRestrictions: {country: 'ua'},
+        fields: ['formatted_address', 'geometry', 'name'],
+        strictBounds: true
+      };
+      const autocomplete = new google.maps.places.Autocomplete(input, options);
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.formatted_address) {
+          return;
+        }
+        this.restaurant.address = place.formatted_address;
+      });
     },
 
     formatDateTime(dateTimeString) {
@@ -150,16 +264,44 @@ export default {
     },
 
     updateOrderStatus(orderId, status) {
-      AxiosInstance.put(`/orders/${orderId}`, { status })
+      AxiosInstance.put(`/orders/${orderId}`, {status})
     },
 
     getPDF() {
       AxiosInstance.get(`/generate-pdf-comments/${this.id}`)
-          .then((response) => {
-            console.log(response.data);
-          });
-    }
+    },
 
+    handleImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (['image/jpeg', 'image/png'].includes(file.type) && file.size <= 5242880) {
+          this.restaurant.image = file;
+          this.imageError = '';
+          const data = {
+            'image': file
+          };
+          console.log(data);
+
+          AxiosInstance.put(`/restaurants/${this.id}`, {...data}, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          })
+              .then((response) => {
+                console.log(response.data.message);
+              })
+
+        } else {
+          this.imageError = 'Формат изображения должен быть JPEG или PNG, размер не должен превышать 5 МБ';
+          this.restaurant.image = null;
+          event.target.value = '';
+        }
+      }
+    },
+
+    getRestaurantImageUrl(imagePath) {
+      return imagePath ? `http://localhost:8080/storage/${imagePath}` : '';
+    },
   },
 };
 </script>

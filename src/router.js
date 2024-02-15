@@ -1,12 +1,13 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {useAuthStore} from "@/stores/Auth.js";
+import AxiosInstance from "@/services/AxiosInstance.js";
 
 const routes = [
     {
         path: "/",
         name: "home",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
         },
         component: () => import("@/pages/private/HomePage.vue"),
     },
@@ -15,7 +16,8 @@ const routes = [
         path: "/declaration-create",
         name: "declaration-create",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'customer'
         },
         component: () => import("@/pages/private/customer/DeclarationCreatePage.vue"),
     },
@@ -24,7 +26,8 @@ const routes = [
         path: "/search",
         name: "search",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'customer'
         },
         component: () => import("@/pages/private/customer/SearchPage.vue"),
     },
@@ -33,7 +36,8 @@ const routes = [
         path: "/settings",
         name: "settings",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'customer'
         },
         component: () => import("@/pages/private/customer/UserSettingsPage.vue")
     },
@@ -42,7 +46,8 @@ const routes = [
         path: "/restaurant-create",
         name: "restaurant-create",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'store',
         },
         component: () => import("@/pages/private/store/RestaurantCreatePage.vue"),
     },
@@ -51,7 +56,8 @@ const routes = [
         path: "/user-restaurants",
         name: "user-restaurants",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'store',
         },
         component: () => import("@/pages/private/store/UserRestaurantsPage.vue")
     },
@@ -60,7 +66,8 @@ const routes = [
         path: "/restaurant-edit/:id",
         name: "restaurant-edit",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'store'
         },
         component: () => import("@/pages/private/store/RestaurantEditPage.vue"),
         props: true,
@@ -70,7 +77,8 @@ const routes = [
         path: "/dish-create/:restaurant_id",
         name: "dish-create",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'store',
         },
         component: () => import("@/pages/private/store/DishCreatePage.vue"),
         props: true,
@@ -80,7 +88,8 @@ const routes = [
         path: "/restaurant-dishes/:restaurant_id",
         name: "restaurant-dishes",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'customer'
         },
         component: () => import("@/pages/private/customer/RestaurantDishesPage.vue"),
         props: true,
@@ -90,7 +99,8 @@ const routes = [
         path: "/orders/:status",
         name: "orders",
         meta: {
-            requiresAuth: true
+            requiresAuth: true,
+            requiredRole: 'customer'
         },
         component: () => import("@/pages/private/customer/UserOrdersPage.vue"),
     },
@@ -128,13 +138,29 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    const requiredRole = to.meta.requiredRole;
 
     if (requiresAuth && !authStore.loggedIn) {
         router.push('/login');
     } else if ((to.name === 'register' || to.name === 'login') && authStore.loggedIn) {
         router.push('/');
     } else {
-        next();
+        if (requiresAuth) {
+            AxiosInstance.get('/user')
+                .then((response) => {
+                    const role = response.data.user.role.name;
+                    if (requiredRole && role !== requiredRole) {
+                        router.push('/not-found');
+                    } else {
+                        next();
+                    }
+                })
+                .catch(() => {
+                    router.push('/login');
+                });
+        } else {
+            next();
+        }
     }
 });
 

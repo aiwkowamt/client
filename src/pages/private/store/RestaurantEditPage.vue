@@ -10,7 +10,7 @@
       </button>
     </div>
 
-    <form>
+    <form enctype="multipart/form-data">
       <div class="form-group mt-3">
         <label for="editedName" class="fw-bold">Название:</label>
         <input v-model="restaurant.name" type="text" id="editedName" class="form-control">
@@ -53,12 +53,14 @@
     </form>
 
     <div v-if="dishes.length">
-      <h2>Блюда в ресторане</h2>
+      <h2>Позиции в ресторане</h2>
       <ul>
         <li v-for="dish in dishes" :key="dish.id">
-          <div>{{ dish.name }}</div>
-          <div>{{ dish.price }}</div>
-          <div>{{ dish.description }}</div>
+          <div>Наименование: {{ dish.name }}</div>
+          <div>Цена: {{ dish.price }}</div>
+          <div>Описание: {{ dish.description }}</div>
+          <img :src="getRestaurantImageUrl(dish.image_path)" alt="Restaurant Image"
+               style="max-width: 200px; margin-top: 10px;">
         </li>
       </ul>
     </div>
@@ -98,6 +100,7 @@ import NewHeader from "@/components/NewHeader.vue";
 import Cookies from "js-cookie";
 import Pusher from "pusher-js";
 import Echo from "laravel-echo";
+import router from "@/router.js";
 
 export default {
   mixins: [ValidatorMixin],
@@ -179,8 +182,12 @@ export default {
       AxiosInstance.get(`/restaurants/edit/${restaurant_id}`)
           .then((response) => {
             this.restaurant = response.data.restaurant;
-            console.log(this.restaurant.image_path);
           })
+          .catch((error) => {
+                if (error.response && error.response.status === 403) {
+                  router.push('/NotFoundPage');
+                }
+          });
     },
 
     getRestaurantDishes(restaurant_id) {
@@ -227,10 +234,20 @@ export default {
 
 
           if (!this.nameError && !this.addressError && !this.phoneError) {
-            // AxiosInstance.put(`/restaurants/${this.id}`, this.restaurant)
-            //     .then(() => {
-            //       this.$router.push('/user-restaurants');
-            //     })
+            const confirmed = window.confirm('Вы уверены, что хотите обновить данные?');
+
+            if (confirmed) {
+              const data = {
+                'name': this.restaurant.name,
+                'address': this.restaurant.address,
+                'phone': this.restaurant.phone,
+              }
+              console.log(data);
+              AxiosInstance.post(`/restaurants/${this.id}`, {...data})
+                  .then(() => {
+                    this.$router.push('/user-restaurants');
+                  })
+            }
           }
         });
       }
@@ -275,20 +292,19 @@ export default {
       const file = event.target.files[0];
       if (file) {
         if (['image/jpeg', 'image/png'].includes(file.type) && file.size <= 5242880) {
-          this.restaurant.image = file;
+          this.image = file;
           this.imageError = '';
-          const data = {
-            'image': file
-          };
-          console.log(data);
 
-          AxiosInstance.put(`/restaurants/${this.id}`, {...data}, {
+          const data = {
+            'image': this.image
+          };
+          AxiosInstance.post(`/restaurants/${this.id}`, {...data}, {
             headers: {
               'Content-Type': 'multipart/form-data',
             }
           })
               .then((response) => {
-                console.log(response.data.message);
+                location.reload();
               })
 
         } else {
@@ -301,6 +317,18 @@ export default {
 
     getRestaurantImageUrl(imagePath) {
       return imagePath ? `http://localhost:8080/storage/${imagePath}` : '';
+    },
+  },
+
+  watch: {
+    'restaurant.name'(newValue) {
+      this.nameError = this.validator(newValue, 'required|min:5|max:30');
+    },
+    'restaurant.address'() {
+      this.addressError = '';
+    },
+    'restaurant.phone'(newValue) {
+      this.phoneError = this.validator(newValue, 'required|integer|size:10');
     },
   },
 };

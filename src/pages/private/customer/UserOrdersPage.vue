@@ -21,7 +21,7 @@
         <div>- - - - - - - - - - - - - - -</div>
         <div class="fs-5">СУММА <span class="fw-bold">{{ calculateTotalCost(order) }}₴</span></div>
 
-        <div  v-if="order.status === 'processing'" class="fs-5">ВРЕМЯ ДОСТАВКИ <span class="fw-bold">{{order.delivery_duration}}</span></div>
+        <div  v-if="order.status === 'processing'" class="fs-5 text-muted">Время доставки <span class="fw-bold">{{order.delivery_duration}}мин</span></div>
 
         <button
             v-if="order.status === 'completed' && order.comment_id === null"

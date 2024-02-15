@@ -2,9 +2,9 @@
 <!--  <Header></Header>-->
   <NewHeader></NewHeader>
   <div class="container">
-    <form>
-      <div class="form-group">
-        <label for="name">Name</label>
+    <form class="mt-3 p-3 shadow rounded">
+      <div class="form-group mt-3">
+        <label for="name">Наименование</label>
         <input
             type="text"
             name="name"
@@ -13,16 +13,16 @@
         >
         <span v-if="nameError" class="text-danger">{{ nameError }}</span>
       </div>
-      <div class="form-group">
-        <label for="category">Category</label>
+      <div class="form-group mt-3">
+        <label for="category">Категория</label>
         <select name="category" v-model="selected_category_id" class="form-control" required>
           <option value="" disabled>Select a category</option>
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
         </select>
         <span v-if="categoryError" class="text-danger">{{ categoryError }}</span>
       </div>
-      <div class="form-group">
-        <label for="price">Price</label>
+      <div class="form-group mt-3">
+        <label for="price">Цена</label>
         <input
             type="number"
             name="price"
@@ -31,8 +31,8 @@
         >
         <span v-if="priceError" class="text-danger">{{ priceError }}</span>
       </div>
-      <div class="form-group">
-        <label for="description">Description</label>
+      <div class="form-group mt-3">
+        <label for="description">Описание</label>
         <textarea
             name="description"
             v-model="description"
@@ -40,8 +40,8 @@
         ></textarea>
         <span v-if="descriptionError" class="text-danger">{{ descriptionError }}</span>
       </div>
-      <div class="form-group">
-        <label for="image">Image</label>
+      <div class="form-group mt-3">
+        <label for="image">Заглавное фото</label>
         <input
             type="file"
             @change="handleImageChange($event)"
@@ -51,7 +51,7 @@
         <span v-if="imageError" class="text-danger">{{ imageError }}</span>
         <img v-if="image" :src="imageURL" alt="Selected Image" style="max-width: 200px; margin-top: 10px;">
       </div>
-      <button type="submit" class="btn btn-primary" @click.prevent="createDish">Submit</button>
+      <button type="submit" class="btn btn-dark mt-3" @click.prevent="createDish">Добавить</button>
     </form>
   </div>
 </template>
@@ -121,20 +121,23 @@ export default {
       }
 
       if (!this.nameError && !this.descriptionError && !this.priceError && !this.categoryError && !this.imageError) {
-        const data = {
-          'name': this.name,
-          'category_id': this.selected_category_id,
-          'restaurant_id': this.restaurant_id,
-          'price': this.price,
-          'description': this.description,
-          'image': this.image,
-        }
-        AxiosInstance.post('/dish', data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+        const confirmed = window.confirm('Вы уверены, что хотите добавить эту позицию?');
+        if (confirmed) {
+          const data = {
+            'name': this.name,
+            'category_id': this.selected_category_id,
+            'restaurant_id': this.restaurant_id,
+            'price': this.price,
+            'description': this.description,
+            'image': this.image,
           }
-        })
-        this.$router.push(`/restaurant-edit/${this.restaurant_id}`);
+          AxiosInstance.post('/dish', {...data}, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          })
+          this.$router.push(`/restaurant-edit/${this.restaurant_id}`);
+        }
       }
     },
 
@@ -169,17 +172,6 @@ export default {
     },
     selected_category_id(newValue) {
       this.categoryError = this.validator(newValue, 'integer');
-    },
-    image(newValue) {
-      if (!newValue) {
-        this.imageError = 'Изображение обязательно для загрузки';
-      } else if (!['image/jpeg', 'image/png'].includes(newValue.type)) {
-        this.imageError = 'Формат изображения должен быть JPEG или PNG';
-      } else if (newValue.size > 5242880) {
-        this.imageError = 'Размер изображения не должен превышать 5 МБ';
-      } else {
-        this.imageError = '';
-      }
     },
   },
 }

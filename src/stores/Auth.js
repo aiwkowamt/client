@@ -43,6 +43,7 @@ export const useAuthStore = defineStore('auth', {
                 .then(() => {
                     this.token = null;
                     Cookies.remove("token");
+                    localStorage.removeItem('cart');
                     router.push('/login');
                     location.reload();
                 })

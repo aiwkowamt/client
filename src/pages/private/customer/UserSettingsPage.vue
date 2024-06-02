@@ -111,7 +111,6 @@ export default {
     updateUser() {
       this.phoneError = this.validator(this.user.phone, 'required|integer|size:10')
       if (!this.addressError && !this.phoneError) {
-        console.log(this.user);
         AxiosInstance.put(`/user/${this.user.id}`, this.user)
             .then(()=>{
               alert('Успешное изменение');

@@ -17,6 +17,10 @@
       </form>
     </div>
 
+    <div v-if="descriptionError">
+      {{ descriptionError }}
+    </div>
+
     <div v-if="declarationStatus === 'pending'">
       <p>Ожидайте рассмотрения заявки</p>
     </div>
@@ -32,14 +36,16 @@
 import AxiosInstance from "@/services/AxiosInstance.js";
 import Header from "@/components/Header.vue";
 import NewHeader from "@/components/NewHeader.vue";
+import ValidatorMixin from "@/services/mixins/ValidatorMixin.js";
 
 export default {
   name: "DeclarationPage",
   components: {NewHeader, Header},
-
+  mixins: [ValidatorMixin],
   data() {
     return {
       description: '',
+      descriptionError: '',
       declarationStatus: null,
     };
   },
@@ -50,14 +56,18 @@ export default {
 
   methods: {
     submitDeclaration() {
-      const data = {
-        'description': this.description,
-      }
+      this.descriptionError = this.validator(this.descriptionError, 'required|min:10|max:255');
 
-      AxiosInstance.post("/declaration", {...data})
-          .then(() => {
-            this.declarationStatus = 'pending';
-          })
+      if(!this.descriptionError){
+        const data = {
+          'description': this.description,
+        }
+
+        AxiosInstance.post("/declaration", {...data})
+            .then(() => {
+              this.declarationStatus = 'pending';
+            })
+      }
     },
 
     checkDeclarationStatus() {

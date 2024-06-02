@@ -107,8 +107,6 @@ export default {
 
   methods: {
     searchRestaurants() {
-      console.log(this.searchQuery);
-
       AxiosInstance.get(`/restaurants-search`, {params: this.searchQuery})
           .then(response => {
             this.restaurants = response.data.restaurants.data;
@@ -172,6 +170,19 @@ export default {
       this.searchRestaurants();
     }
   },
+
+  watch: {
+    'searchQuery.name': function(newValue, oldValue) {
+      this.searchQuery.page = 1;
+    },
+    'searchQuery.sortBy': function(newValue, oldValue) {
+      this.searchQuery.page = 1;
+    },
+    'searchQuery.categories': function(newValue, oldValue) {
+      this.searchQuery.page = 1;
+    },
+  },
+
 };
 </script>
 

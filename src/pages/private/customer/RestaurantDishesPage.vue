@@ -249,8 +249,9 @@ export default {
     },
 
     confirmOrder() {
-      if (this.address.trim() === '') {
+      if (!this.address || this.address.trim() === '') {
         this.addressError = 'Адрес должен быть в Украине';
+        return;
       } else {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({address: this.address}, (results, status) => {
@@ -290,7 +291,6 @@ export default {
               items,
               delivery_duration: durationInMinutes,
             };
-            console.log(data);
             AxiosInstance.post('create-order', data)
                 .then(() => {
                   this.cart = this.cart.filter(item => item.dish.restaurant_id !== parseInt(this.restaurant_id));

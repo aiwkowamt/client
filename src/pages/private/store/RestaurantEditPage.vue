@@ -131,7 +131,7 @@ export default {
       dishes: [],
       orders: [],
 
-      isVisiblePdfBtn: false,
+      isVisiblePdfBtn: true,
     };
   },
 
@@ -242,7 +242,6 @@ export default {
                 'address': this.restaurant.address,
                 'phone': this.restaurant.phone,
               }
-              console.log(data);
               AxiosInstance.post(`/restaurants/${this.id}`, {...data})
                   .then(() => {
                     this.$router.push('/user-restaurants');
